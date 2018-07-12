@@ -1,0 +1,9 @@
+knpu_oauth2_client:
+    clients:
+        maniaplanet:
+            type: generic
+            provider_class: App\Security\OAuth2\ManiaplanetProvider
+            client_id: '%env(MP_CLIENT_ID)%'
+            client_secret: '%env(MP_CLIENT_SECRET)%'
+            redirect_route: connect_maniaplanet_finish
+            redirect_params: {}

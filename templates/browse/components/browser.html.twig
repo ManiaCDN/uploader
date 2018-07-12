@@ -1,0 +1,65 @@
+{# convert bytes in a human readable way #}
+{% import "macros/bytes.html.twig" as bytes %}
+
+<form method="post" action="{{ app.request.uri }}">
+    <table class="table table-condensed table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>Approved</th>
+                <th>Delete</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in list %}
+                {% set filepath = path ~ '/' ~ item.filename|trim('/') %}
+                {% set block_disabled = not is_granted('ROLE_ADMIN') ? 'disabled' %}
+                <tr>
+                    <!-- name -->
+                    <td>
+                        {% if item.isDir %}
+                            <a style="display:block; width:100%;" 
+                            href="{{ app.request.pathinfo ~ '?path=' ~ filepath }}">
+                                <span class="glyphicon glyphicon-folder-close"></span> {{ item.filename }}
+                            </a>
+                        {% else %}
+                            <span class="glyphicon glyphicon-file"></span> {{ item.filename }}
+                        {% endif %}
+                    </td>
+
+                    <!-- size -->
+                    <td>{{ bytes.humanReadableBytes(item.getSize) }}</td>
+
+                    <!-- block -->
+                    <td>
+                        {% if item.isFile %}
+                            <input type="radio" {{ filepath in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="true"> yes
+                            <input type="radio" {{ filepath not in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="false"> no
+                        {% endif %}
+                    </td>
+
+                    <!-- delete -->
+                    <td>
+                        {% if isAllowedToWrite %}
+                            <input type="checkbox" name="delete[{{ filepath }}]" value="true">
+                        {% endif %}
+                    </td>
+
+                    <!-- download -->
+                    <td>{% if item.isFile %}<a style="display:block; width:100%;" 
+                            href="{{ PUBLIC_UPLOAD_URL ~ filepath }}">
+                        Link</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% else %}
+                <div class="alert alert-info">
+                    No items in this folder.
+                </div>
+            {% endfor %}
+        </table>
+        <button type="submit" name="block-delete" class="btn btn-primary">Update Block & Delete</button>
+    </tbody>
+</form>

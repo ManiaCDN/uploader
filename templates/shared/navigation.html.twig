@@ -1,0 +1,24 @@
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{{ path('homepage') }}">ManiaCDN</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <!--<li class="active"><a href="#">Home</a></li>-->
+            <li><a href="{{ path('homepage') }}">Home</a></li>
+            <li><a href="{{ path('browse') }}">Browse & Upload</a></li>
+            <li><a href="{{ path('privacy') }}">Privacy</a></li>
+            {% if is_granted('ROLE_ADMIN') %}
+                <li><a href="{{ path('admin') }}">Admin</a></li>
+            {% endif %}
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+                <li><a href="{{ path('login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+            {% else %}
+                <p class="navbar-text"><span class="glyphicon glyphicon-user"></span> {{ app.user.username }}</p>
+                <li><a href="{{logout_path(key = null)}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>

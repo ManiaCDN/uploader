@@ -1,0 +1,14 @@
+{# templates/home.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Logged in{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {% if login_finished is defined %}
+            <div class="alert alert-success">
+                <p><span class="glyphicon glyphicon-ok-sign"></span> Successfully logged in.</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

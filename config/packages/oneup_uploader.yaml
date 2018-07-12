@@ -1,0 +1,11 @@
+# Read the documentation: https://github.com/1up-lab/OneupUploaderBundle/blob/master/Resources/doc/index.md
+oneup_uploader:
+    mappings:
+        # This is a mapping example, remove it and create your own mappings.
+        browse:
+            frontend: dropzone
+            root_folder: true # true disables usage of a seperate mapping folder
+            namer: app.upload_namer # which file name and folder structure to use
+            disallowed_mimetypes: [php, php4, php5, php7, aspx, asp, pl, jsp]
+            storage:
+                directory: '%env(UPLOAD_DIR)%' # relative to kernel, namer works relative to this

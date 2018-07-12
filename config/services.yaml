@@ -1,0 +1,61 @@
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    locale: 'en'
+    app.admin_email: 'info@maniacdn.net'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: false       # Allows optimizing the container by removing unused services; this also means
+                            # fetching services directly from the container via $container->get() won't work.
+                            # The best practice is to be explicit about your dependencies anyway.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{Entity,Migrations,Tests,Kernel.php}'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    
+    # Add service tag for Maniaplanet
+    App\Security\OAuth2\ManiaplanetAuthenticator:
+        tags: [controller.service_arguments]
+
+    # event to check if the file is allowed to be saved (security stuff)
+    # called before app.upload_listener
+    app.upload_validation_listener:
+        class: App\EventListener\UploadValidationListener
+        arguments: ["@security.token_storage"]
+        tags:
+            - { name: kernel.event_listener, event: oneup_uploader.validation, method: onValidate }
+    
+    # event to do external actions (like writing blocked_files)
+    # called after app.upload_validation_listener
+    app.upload_listener:
+        class: App\EventListener\UploadListener
+        # the '@' symbol is important: that's what tells the container
+        # you want to pass the *service* whose id is 'monolog.logger.request',
+        # and not just the *string* 'monolog.logger.request'
+        arguments: ['@App\Service\BlockedFilesManager']
+        tags:
+            - { name: kernel.event_listener, event: oneup_uploader.post_persist, method: onUpload }
+
+    # set the name and path of the uploaded file
+    app.upload_namer:
+        class: App\Uploader\UploadNamer
+        public: true
+    
+    App\Service\Mailer:
+        arguments:
+            $adminEmail: '%app.admin_email%'

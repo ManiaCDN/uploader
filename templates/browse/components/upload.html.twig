@@ -1,0 +1,16 @@
+{% if isAllowedToWrite %}
+    {% block stylesheets %}
+    <link href="{{ asset('css/dropzone.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/dropzone_basic.css') }}" rel="stylesheet" />
+    {% endblock %}
+
+    {% block body %}
+        <form action="{{ oneup_uploader_endpoint('browse') }}" class="dropzone" id="upload-browse"></form>
+        <br>
+    {% endblock %}
+
+    {% block javascripts %}
+    <script type="text/javascript" src="{{ asset('js/dropzone.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('js/dropzone.config.js') }}"></script>
+    {% endblock %}
+{% endif %}

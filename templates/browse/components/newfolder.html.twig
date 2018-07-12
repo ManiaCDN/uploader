@@ -1,0 +1,10 @@
+{% if isAllowedToWrite %}
+    <form method="post" action="{{ app.request.uri }}" class="form-inline">
+        <div class="form-group">
+            <label for="newdir">Create Folder</label>
+            <input name="newdir" type="text" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-default">Create</button>
+    </form>
+    <br>
+{% endif %}
