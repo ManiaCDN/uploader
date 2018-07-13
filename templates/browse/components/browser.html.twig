@@ -22,10 +22,10 @@
                         {% if item.isDir %}
                             <a style="display:block; width:100%;" 
                             href="{{ app.request.pathinfo ~ '?path=' ~ filepath }}">
-                                <span class="glyphicon glyphicon-folder-close"></span> {{ item.filename }}
+                                <span class="glyphicon glyphicon-folder-close"></span> {{ item.filename|e }}
                             </a>
                         {% else %}
-                            <span class="glyphicon glyphicon-file"></span> {{ item.filename }}
+                            <span class="glyphicon glyphicon-file"></span> {{ item.filename|e }}
                         {% endif %}
                     </td>
 
