@@ -41,11 +41,8 @@ class BrowseController extends Controller
         $this->request = Request::createFromGlobals();
         $this->path = $this->security->checkDirUp($this->request->query->get('path', ''));
         
-        // (un-)blocks files
-        $this->blockAction();
-
-        // deletes files
-        $this->deleteAction();
+        // (un-)blocks files, deltes files
+        $this->blockDeleteAction();
 
         // create folder
         $this->createFolderAction();
@@ -53,7 +50,7 @@ class BrowseController extends Controller
         // create user folder
         $this->createUserFolderAction();
         
-        // no folder yet? ask the user to create
+        // no folder yet? ask the user to create it
         $this->fsm->userHasFolder();
         
         $list = $this->makeList($this->path);
@@ -71,37 +68,47 @@ class BrowseController extends Controller
     /**
      * Block files according to form (in-table) submitted by ADMIN
      * 
-     * @return bool
+     * @throws \Exception
      */
-    private function blockAction() {
-        if (false === $this->authChecker->isGranted('ROLE_ADMIN')) {
-            return null;
+    private function blockDeleteAction() {
+        $blocks = $this->request->request->get('block', array());
+        $delete = $this->request->request->get('delete', array());
+        $token  = $this->request->request->get('token');
+        
+        if (empty($blocks)) {
+            // blocks will always list at least one file, if the folder wasn't empty
+            // and user still pressed update button. nothing to do here
+            return;
         }
         
-        $blocks = $this->request->request->get('block', array());
-        return $this->bfm->block($blocks, true); // second param: inform user by email
-    }
-    
-    /**
-     * Delete files. Just passing through ...
-     * 
-     * @return bool|null
-     */
-    private function deleteAction() {
-        $delete = $this->request->request->get('delete', array());
-        return $this->fsm->delete($delete);
+        if (!$this->isCsrfTokenValid('browse_block-delete', $token)) {
+            throw new \Exception('CSRF token invalid!');
+        }
+        
+        // block
+        if (true === $this->authChecker->isGranted('ROLE_ADMIN')) {
+            $this->bfm->block($blocks, true); // second param: inform user by email
+        }
+        
+        // delete
+        $this->fsm->delete($delete);
     }
     
     /**
      * Creates any folder. Just passing through ...
      * 
-     * @return bool
+     * @throws \Exception
      */
     private function createFolderAction() {
         $folder = $this->request->request->get('newdir', false);
+        $token  = $this->request->request->get('token');
         
         if ($folder) {
-            return $this->fsm->createFolder($this->path.'/'.$folder);
+            if (!$this->isCsrfTokenValid('browse_newfolder', $token)) {
+                throw new \Exception('CSRF token invalid!');
+            }
+            
+            $this->fsm->createFolder($this->path.'/'.$folder);
         }
     }
     

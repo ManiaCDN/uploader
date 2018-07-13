@@ -1,4 +1,6 @@
 make sure session timeout doesn't interrupt upload // should be confirmed
-show user list to admins
-show blocked files on one page for admin
+CSRF protection for uploader
+remove hardlink from cookieconsent.js
 Convert email template to html
+clickable path in browser (->boostrap breadcrumbs)
+bulk select for delete and block

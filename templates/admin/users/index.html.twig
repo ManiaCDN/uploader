@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ManiaCDN Admin{% endblock %}
+
+{% block body %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Login</th>
+            <th>Nickname</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in list %}
+            <tr>
+                <!-- login -->
+                <td>
+                    {{ item.login|e }}
+                </td>
+
+                <!-- nickname -->
+                <td>
+                    {{ item.nickname|e }}
+                </td>
+
+                <!-- email -->
+                <td>
+                    <a href="mailto:{{ item.email|e }}">{{ item.email|e }}</a>
+                </td>
+            </tr>
+        {% else %}
+            <div class="alert alert-info">
+                No users registred? What? That's sad.
+            </div>
+        {% endfor %}
+    </table>
+</tbody>
+
+{% endblock %}

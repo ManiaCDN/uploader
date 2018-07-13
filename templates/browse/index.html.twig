@@ -4,23 +4,17 @@
 
 {% block body %}
 
-<div class="container">
-    <!-- uploader -->
-    {% include 'browse/components/upload.html.twig' %}
-    
-    <!-- Infoboxes -->
-    {% include 'browse/components/infoboxes.html.twig' %}
-    <br>
-    
-    <!-- create new folder -->
-    {% include 'browse/components/newfolder.html.twig' %}
-    
-    <!-- header for the browser (parent folder, own folder, other buttons) -->
-    {% include 'browse/components/browser_header.html.twig' %}
-    <br>
-    <br>
-    
-    <!-- filebrowser (table) -->
-    {% include 'browse/components/browser.html.twig' %}
-</div>
+<!-- uploader -->
+{% include 'browse/components/upload.html.twig' %}
+
+<!-- create new folder -->
+{% include 'browse/components/newfolder.html.twig' %}
+
+<!-- header for the browser (parent folder, own folder, other buttons) -->
+{% include 'browse/components/browser_header.html.twig' %}
+<br>
+<br>
+
+<!-- filebrowser (table) -->
+{% include 'browse/components/browser.html.twig' %}
 {% endblock %}

@@ -6,6 +6,6 @@ oneup_uploader:
             frontend: dropzone
             root_folder: true # true disables usage of a seperate mapping folder
             namer: app.upload_namer # which file name and folder structure to use
-            disallowed_mimetypes: [php, php4, php5, php7, aspx, asp, pl, jsp]
+            disallowed_mimetypes: [php, php4, php5, php7, aspx, asp, pl, jsp, htaccess]
             storage:
                 directory: '%env(UPLOAD_DIR)%' # relative to kernel, namer works relative to this

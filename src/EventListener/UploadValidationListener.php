@@ -19,16 +19,21 @@ class UploadValidationListener
 {
     private $tokenStorage;
     private $security;
+    private $authChecker;
     
-    public function __construct(TokenStorage $tokenStorage, Security $security)
-    {
+    public function __construct(
+            TokenStorage $tokenStorage,
+            Security $security,
+            AuthorizationCheckerInterface $authChecker
+    ) {
         $this->tokenStorage = $tokenStorage;
         $this->security = $security;
+        $this->authChecker = $authChecker;
     }
     
-    public function onValidate(ValidationEvent $event, AuthorizationCheckerInterface $authChecker)
+    public function onValidate(ValidationEvent $event)
     {
-        if (!$authChecker->isGranted('ROLE_USER')) {
+        if (!$this->authChecker->isGranted('ROLE_USER')) {
             throw new AccessDeniedException('Only logged in users allowed to upload!');
         }
         

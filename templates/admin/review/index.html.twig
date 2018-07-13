@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ManiaCDN Admin{% endblock %}
+
+{% block body %}
+<form method="post" action="{{ app.request.uri }}">
+    <input type="hidden" name="token" value="{{ csrf_token('admin_block-delete') }}" />
+    <table class="table table-condensed table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Approved</th>
+                <th>Delete</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in list %}
+                {% set filepath = item|trim('/') %}
+                <tr>
+                    <!-- name -->
+                    <td>
+                        <span class="glyphicon glyphicon-file"></span> {{ item|e }}
+                    </td>
+
+                    <!-- block -->
+                    <td>
+                        <input type="radio" checked name="block[{{ filepath }}]" value="true"> no
+                        <input type="radio" name="block[{{ filepath }}]" value="false"> yes
+                    </td>
+
+                    <!-- delete -->
+                    <td>
+                        <input type="checkbox" name="delete[{{ filepath }}]" value="true">
+                    </td>
+
+                    <!-- download -->
+                    <td>
+                        <a style="display:block; width:100%;" 
+                            href=""
+                        >Link</a>
+                    </td>
+                </tr>
+            {% else %}
+                <div class="alert alert-info">
+                    No items in this folder.
+                </div>
+            {% endfor %}
+        </table>
+        <button type="submit" name="block-delete" class="btn btn-primary">Update Block & Delete</button>
+    </tbody>
+</form>
+
+{% endblock %}

@@ -96,7 +96,7 @@ class BlockedFilesManager
     }
 
     /**
-     * Reads the \n separated file of blocked files into an array.
+     * Reads the "\n" separated file of blocked files into an array.
      * Optionally inverts (flip) the array key and value pairs
      * 
      * @param bool $flip

@@ -108,12 +108,13 @@ class FilesystemManager
         $pathname = $this->cleanPath($pathname); // remove specialchars
         $dirToCreate = getenv('UPLOAD_DIR').'/'.$pathname;
         
-        if ($this->security->isAllowedToWrite($pathname, $this->user)) {
+        if ($this->security->isAllowedToWrite($pathname, $this->user)
+            && !$this->filesystem->exists($dirToCreate)) {
             $this->filesystem->mkdir($dirToCreate);
             $this->session->getFlashBag()->add('success', 'Directory successfully created.');
             return true;
         } else {
-            $this->session->getFlashBag()->add('danger', 'You\'re not allowed to create a folder here');
+            $this->session->getFlashBag()->add('danger', 'Could not create the folder. Do you have permission? Does the folder or file already exist?');
             return false;
         }
     }

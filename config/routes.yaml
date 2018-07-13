@@ -2,9 +2,13 @@ homepage:
     path: /
     controller: App\Controller\HomeController::show
     
-admin:
-    path: /admin
-    controller: App\Controller\AdminController::show
+admin_review:
+    path: /admin/review
+    controller: App\Controller\Admin\ReviewController::show
+
+admin_users:
+    path: /admin/users
+    controller: App\Controller\Admin\UsersController::show
 
 privacy:
     path: /privacy

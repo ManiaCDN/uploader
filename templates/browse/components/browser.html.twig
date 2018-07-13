@@ -2,6 +2,7 @@
 {% import "macros/bytes.html.twig" as bytes %}
 
 <form method="post" action="{{ app.request.uri }}">
+    <input type="hidden" name="token" value="{{ csrf_token('browse_block-delete') }}" />
     <table class="table table-condensed table-hover">
         <thead>
             <tr>
@@ -21,7 +22,7 @@
                     <td>
                         {% if item.isDir %}
                             <a style="display:block; width:100%;" 
-                            href="{{ app.request.pathinfo ~ '?path=' ~ filepath }}">
+                                href="{{ app.request.pathinfo ~ '?path=' ~ filepath }}">
                                 <span class="glyphicon glyphicon-folder-close"></span> {{ item.filename|e }}
                             </a>
                         {% else %}
@@ -30,13 +31,15 @@
                     </td>
 
                     <!-- size -->
-                    <td>{{ bytes.humanReadableBytes(item.getSize) }}</td>
+                    <td>
+                        {{ bytes.humanReadableBytes(item.getSize) }}
+                    </td>
 
                     <!-- block -->
                     <td>
                         {% if item.isFile %}
-                            <input type="radio" {{ filepath in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="true"> yes
-                            <input type="radio" {{ filepath not in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="false"> no
+                            <input type="radio" {{ filepath in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="true"> no
+                            <input type="radio" {{ filepath not in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="false"> yes
                         {% endif %}
                     </td>
 
@@ -48,9 +51,11 @@
                     </td>
 
                     <!-- download -->
-                    <td>{% if item.isFile %}<a style="display:block; width:100%;" 
-                            href="{{ PUBLIC_UPLOAD_URL ~ filepath }}">
-                        Link</a>
+                    <td>
+                        {% if item.isFile %}
+                            <a style="display:block; width:100%;" 
+                                href="{{ PUBLIC_UPLOAD_URL ~ filepath }}"
+                            >Link</a>
                         {% endif %}
                     </td>
                 </tr>
