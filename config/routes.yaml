@@ -5,6 +5,10 @@ homepage:
 admin_review:
     path: /admin/review
     controller: App\Controller\Admin\ReviewController::show
+    
+admin_review_download:
+    path: /admin/review/download
+    controller: App\Controller\Admin\ReviewController::download
 
 admin_users:
     path: /admin/users

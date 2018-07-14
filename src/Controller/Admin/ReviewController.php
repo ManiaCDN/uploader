@@ -13,6 +13,8 @@ namespace App\Controller\Admin;
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -51,12 +53,36 @@ class ReviewController extends Controller
         ]);
     }
     
+    public function download()
+    {
+        if (false === $this->authChecker->isGranted('ROLE_ADMIN')) {
+            throw new AccessDeniedException('Only Admins allowed here.');
+        }
+        
+        $file = $this->request->query->get('file');
+        $pathname = getenv('UPLOAD_DIR').'/'.$file;
+        
+        $spl = new \SplFileInfo($pathname); // why doesn't spl provide MIME types?
+        $finfo = new \finfo(FILEINFO_MIME);
+        
+        $response = new BinaryFileResponse($pathname);
+        $response->headers->set('Content-Type', $finfo->file($pathname));
+        $response->headers->set('Content-Length', $spl->getSize());
+        $response->setContentDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            basename($file)
+        );
+        
+        return $response->send();
+    }
+    
     /**
      * Block files according to form (in-table) submitted by ADMIN
      * 
      * @throws \Exception
      */
-    private function blockDeleteAction() {
+    private function blockDeleteAction()
+    {
         $blocks = $this->request->request->get('block', array());
         $delete = $this->request->request->get('delete', array());
         $token  = $this->request->request->get('token');
