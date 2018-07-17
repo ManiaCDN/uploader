@@ -167,7 +167,7 @@ class ManiaplanetAuthenticator extends SocialAuthenticator
         $user->setEmail($maniaplanetUser->getEmail());
         $user->setNickname($maniaplanetUser->getNickname());
         $user->setLogin($maniaplanetUser->getLogin());
-        $user->setRole(['ROLE_USER']);
+        $user->setRole('ROLE_USER');
 
         $this->em->persist($user); // tell doctrine about the change
         $this->em->flush(); // let doctrine execute it and run the query to the database

@@ -33,4 +33,5 @@ That's it already. Now you're ready to start the development server of Symfony:
 Keep the terminal / commandline open. You'll find the sample on http://localhost:8000/
 
 ## Going on
-For people familiar with Symfony, things should go pretty straightforward. Don't forget to setup the .env according to your environment. I have tried to comply with Symfony Best Practices as much as possible, so you should find all files where you'd expect them.
+For people familiar with Symfony, things should go pretty straightforward. Don't forget to setup the .env according to your environment and run doctrine migrations. I have tried to comply with Symfony Best Practices as much as possible, so you should find all files where you'd expect them.
+You might also delete the pre-existing Migrations in src/Migrations, if doctrine throws strange errors while executing the migration.
