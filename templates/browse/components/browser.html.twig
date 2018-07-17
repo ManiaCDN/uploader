@@ -3,6 +3,7 @@
 
 <form method="post" action="{{ app.request.uri }}">
     <input type="hidden" name="token" value="{{ csrf_token('browse_block-delete') }}" />
+    <input type="hidden" name="submit_block-delete" value="true" />
     <table class="table table-condensed table-hover">
         <thead>
             <tr>

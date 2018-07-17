@@ -74,10 +74,10 @@ class BrowseController extends Controller
         $blocks = $this->request->request->get('block', array());
         $delete = $this->request->request->get('delete', array());
         $token  = $this->request->request->get('token');
+        $submit = $this->request->request->get('submit_block-delete', false);
         
-        if (empty($blocks)) {
-            // blocks will always list at least one file, if the folder wasn't empty
-            // and user still pressed update button. nothing to do here
+        // only continue if there is somethign to do
+        if (false === $submit) {
             return;
         }
         
