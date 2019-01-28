@@ -24,6 +24,10 @@ class Security
      * @return boolean
      */
     public function isAllowedToWrite(string $path, UserInterface $user): bool {
+        if (true === in_array('ROLE_BANNED', $user->getRoles())) {
+            return false;
+        }
+        
         if (true === in_array('ROLE_ADMIN', $user->getRoles()) ||
             $user->getUsername() == $this->pathLogin($path)
         ) {

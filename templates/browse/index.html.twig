@@ -4,6 +4,13 @@
 
 {% block body %}
 
+<!-- banned notification -->
+{% if is_granted('ROLE_BANNED') %}
+<div class="alert alert-warning">
+    <strong>You're banned</strong> from uploading or modifying files on ManiaCDN. If there is any question, please kindly contact info@maniacdn.net. 
+</div>
+{% endif  %}
+
 <!-- uploader -->
 {% include 'browse/components/upload.html.twig' %}
 
