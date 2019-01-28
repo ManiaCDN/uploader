@@ -15,11 +15,11 @@ use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class UsersController extends Controller
+class UsersController extends AbstractController
 {
     private $userRepository;
     private $authChecker;

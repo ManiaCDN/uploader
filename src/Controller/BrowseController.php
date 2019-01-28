@@ -18,9 +18,9 @@ use App\Service\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class BrowseController extends Controller
+class BrowseController extends AbstractController
 {
     private $bfm;
     private $authChecker;
@@ -41,7 +41,7 @@ class BrowseController extends Controller
         $this->request = Request::createFromGlobals();
         $this->path = $this->security->checkDirUp($this->request->query->get('path', ''));
         
-        // (un-)blocks files, deltes files
+        // (un-)blocks files, deletes files
         $this->blockDeleteAction();
 
         // create folder

@@ -3,9 +3,9 @@
 namespace App\Controller;
 
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class PrivacyController extends Controller
+class PrivacyController extends AbstractController
 {
     public function show()
     {

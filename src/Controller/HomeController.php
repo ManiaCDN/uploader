@@ -11,12 +11,15 @@
 namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class HomeController extends Controller
+class HomeController extends AbstractController
 {
     public function show()
     {
-        return $this->render('home/index.html.twig');
+        return $this->render('home/index.html.twig', 
+                [
+                    "message" => "<h2>Welcome to the ManiaCDN Uploader v2</h2>"
+                ]);
     }
 }

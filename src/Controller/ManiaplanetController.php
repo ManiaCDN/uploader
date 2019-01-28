@@ -11,19 +11,19 @@
 namespace App\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class ManiaplanetController extends Controller
+class ManiaplanetController extends AbstractController
 {
     /**
      * Link to this controller to start the "connect" process
      * It redirects to the Maniaplanet login page
      */
-    public function connectAction()
+    public function connectAction(ClientRegistry $clientRegistry)
     {
         // will redirect to Maniaplanet!
-        return $this->get('oauth2.registry')
+        return $clientRegistry
             ->getClient('maniaplanet') // key used in config.yml
             ->redirect();
     }
