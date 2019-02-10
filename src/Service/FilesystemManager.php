@@ -16,6 +16,7 @@ use App\Service\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class FilesystemManager
 {
@@ -23,6 +24,8 @@ class FilesystemManager
     private $security;
     private $user;
     private $session;
+    private $request;
+    private $currentPath;
     private $twig;
     
     private $filesystem;
@@ -37,6 +40,8 @@ class FilesystemManager
         $this->security = $security;
         $this->user = $tokenStorage->getToken()->getUser();
         $this->session = $session;
+        $this->request = Request::createFromGlobals();
+        $this->currentPath = $this->security->checkDirUp($this->request->query->get('path', ''));
         $this->twig = $twig;
         
         $this->filesystem = new Filesystem();
@@ -143,6 +148,10 @@ class FilesystemManager
      */
     public function userHasFolder(): bool {
         if ($this->filesystem->exists(getenv('UPLOAD_DIR').'/'.$this->user->getUsername())) {
+            // ugly, please fix :(
+            if (@explode('/', $this->currentPath)[1] != $this->user->getUsername()) {
+                $this->session->getFlashBag()->add('info', 'Please note that you can only upload files if you are in your own home directory. Click the "Go to my folder" button to always get there quickly.');
+            }
             return true;
         } else {
             // this template contains a button which offers to create the folder

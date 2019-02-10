@@ -12,7 +12,6 @@ namespace App\Controller\Admin;
 
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;

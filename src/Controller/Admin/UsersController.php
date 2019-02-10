@@ -11,9 +11,6 @@
 namespace App\Controller\Admin;
 
 use App\Repository\ManiaplanetUserRepository;
-use App\Service\BlockedFilesManager;
-use App\Service\FilesystemManager;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -45,31 +42,5 @@ class UsersController extends AbstractController
         return $this->render('admin/users/index.html.twig', [
             'list' => $list,
         ]);
-    }
-    
-    /**
-     * Block files according to form (in-table) submitted by ADMIN
-     * 
-     * @return bool
-     */
-    private function blockAction()
-    {
-        if (false === $this->authChecker->isGranted('ROLE_ADMIN')) {
-            return null;
-        }
-        
-        $blocks = $this->request->request->get('block', array());
-        return $this->bfm->block($blocks, true); // second param: inform user by email
-    }
-    
-    /**
-     * Delete files. Just passing through ...
-     * 
-     * @return bool|null
-     */
-    private function deleteAction()
-    {
-        $delete = $this->request->request->get('delete', array());
-        return $this->fsm->delete($delete);
     }
 }
