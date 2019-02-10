@@ -36,8 +36,12 @@ class SettingsController extends AbstractController
         
         $this->setWelcome();
         
+        $welcome_prev = $this->getDoctrine()
+            ->getRepository(Setting::class)
+            ->getWelcome();
+        
         return $this->render('admin/settings/index.html.twig', [
-            'welcome_message' => $this->getWelcome()->getValue(),
+            'welcome_message' => $welcome_prev,
         ]);
     }
     
@@ -48,12 +52,6 @@ class SettingsController extends AbstractController
             throw new \Exception('CSRF token invalid!');
         }
     }
-    
-    private function getWelcome() {
-        return $this->getDoctrine()
-            ->getRepository(Setting::class)
-            ->findOneBy(['name' => 'welcome_message']);
-    }
      
     private function setWelcome() {
         $value = $this->request->request->get('welcome_message');
@@ -63,10 +61,12 @@ class SettingsController extends AbstractController
         
         $this->csrfCheck();
         
-        $em = $this->getDoctrine()->getManager();      
+        $em = $this->getDoctrine()->getManager();
         
         // get current setting so we know if it needs to be updated
-        $db_setting = $this->getWelcome();
+        $db_setting = $this->getDoctrine()
+            ->getRepository(Setting::class)
+            ->findOneBy(['name' => 'welcome_message']);
         
         if (null !== $db_setting) {
             // setting already exists, so let's update it

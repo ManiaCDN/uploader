@@ -19,8 +19,7 @@ class HomeController extends AbstractController
     {
         $welcome = $this->getDoctrine()
             ->getRepository(Setting::class)
-            ->findOneBy(['name' => 'welcome_message'])
-            ->getValue();
+            ->getWelcome();
         
         return $this->render('home/index.html.twig', 
                 [

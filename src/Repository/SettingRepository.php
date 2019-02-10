@@ -47,4 +47,20 @@ class SettingRepository extends ServiceEntityRepository
         ;
     }
     */
+    
+    /*
+     * safely get a welcome message, whether one is set or not
+     */
+    public function getWelcome(): string {
+        $welcome = $this->findOneBy(['name' => 'welcome_message']);
+        
+        if (null === $welcome) {
+            $welcome = '# No welcome set yet!';
+        }
+        else {
+            $welcome = $welcome->getValue();
+        }
+        
+        return $welcome;
+    }
 }
