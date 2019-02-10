@@ -3,22 +3,5 @@
 {% block title %}ManiaCDN Home{% endblock %}
 
 {% block body %}
-    <h2>Welcome to the ManiaCDN Uploader v2</h2>
-    <p>
-        We have made a huge overhaul of the uploader website as that means,
-        we have rewritten it from the ground up. You will find the source code
-        on our <a href="https://github.com/ManiaCDN/uploader">github organization</a>.
-    </p>
-    <p>
-        That means the user interface has also changed. We hope it is now
-        easier to use. Also pre-existing bugs should be fixed. Nonetheless,
-        you might encounter bugs which haven't faced before. Please report
-        them to us by sending an email to info [at] maniacdn [dot] net.
-        Thank you!
-    </p>
-    <br>
-    <br>
-    
-    {% include 'home/components/instructions.html.twig' %} 
-    {% include 'home/components/conditions.html.twig' %}
+    {{ message|markdown }}
 {% endblock %}

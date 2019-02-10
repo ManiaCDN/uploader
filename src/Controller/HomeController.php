@@ -10,16 +10,21 @@
 
 namespace App\Controller;
 
-use Symfony\Component\HttpFoundation\Response;
+use App\Entity\Setting;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class HomeController extends AbstractController
 {
     public function show()
     {
+        $welcome = $this->getDoctrine()
+            ->getRepository(Setting::class)
+            ->findOneBy(['name' => 'welcome_message'])
+            ->getValue();
+        
         return $this->render('home/index.html.twig', 
                 [
-                    "message" => "<h2>Welcome to the ManiaCDN Uploader v2</h2>"
+                    "message" => $welcome
                 ]);
     }
 }

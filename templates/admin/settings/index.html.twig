@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ManiaCDN Admin{% endblock %}
+
+{% block body %}
+    <p>
+        Set a welcome message on the home page. Supported syntax can be found
+        <a href="https://daringfireball.net/projects/markdown/">here</a> and 
+        <a href="https://michelf.ca/projects/php-markdown/extra/">here</a>.
+    </p>
+    <form method="post" action="{{ app.request.uri }}">
+        <input type="hidden" name="token" value="{{ csrf_token('admin_edit-home') }}" />
+        <textarea name="welcome_message" class="form-control" rows="15">{{ welcome_message }}</textarea>
+        <br>
+        <button type="submit" name="submit" class="btn btn-primary">Update</button>
+    </form>
+
+{% endblock %}

@@ -59,3 +59,11 @@ services:
     App\Service\Mailer:
         arguments:
             $adminEmail: '%app.admin_email%'
+    
+    Aptoma\Twig\Extension\MarkdownEngineInterface:
+        class: Aptoma\Twig\Extension\MarkdownEngine\MichelfMarkdownEngine 
+
+    twig.extension.markdown:
+        class: Aptoma\Twig\Extension\MarkdownExtension
+        tags:
+            - { name: twig.extension }

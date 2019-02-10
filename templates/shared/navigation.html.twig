@@ -14,7 +14,8 @@
                     <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ path('admin_review') }}">Review</a></li>
-                        <li><a href="{{ path('admin_users') }}">User</a></li>
+                        <li><a href="{{ path('admin_users') }}">Users</a></li>
+                        <li><a href="{{ path('admin_settings') }}">Settings</a></li>
                     </ul>
                 </li>
             {% endif %}
@@ -23,7 +24,9 @@
             {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
                 <li><a href="{{ path('login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
             {% else %}
-                <p class="navbar-text"><span class="glyphicon glyphicon-user"></span> {{ app.user.username }}</p>
+                <p class="navbar-text"><span class="glyphicon glyphicon-user"></span>
+                    {{ app.user.username }} ({{ app.user.email ? app.user.email : 'NO EMAIL PROVIDED' }})
+                </p>
                 <li><a href="{{logout_path(key = null)}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
             {% endif %}
         </ul>

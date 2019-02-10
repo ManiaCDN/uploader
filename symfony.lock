@@ -1,4 +1,7 @@
 {
+    "aptoma/twig-markdown": {
+        "version": "3.0.0"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -88,6 +91,9 @@
     },
     "league/oauth2-client": {
         "version": "2.3.0"
+    },
+    "michelf/php-markdown": {
+        "version": "1.8.0"
     },
     "monolog/monolog": {
         "version": "1.23.0"
