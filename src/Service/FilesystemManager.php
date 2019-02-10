@@ -79,8 +79,6 @@ class FilesystemManager
             
             if (is_dir($fullPath)) {
                 if (!$this->isDirEmpty($fullPath)) {
-                    dump($this->isDirEmpty($fullPath));
-                    dump($fullPath);
                     $this->session->getFlashBag()->add('warning', 'Only empty folders can be deleted.');
                     return false;
                 }
@@ -148,8 +146,7 @@ class FilesystemManager
      */
     public function userHasFolder(): bool {
         if ($this->filesystem->exists(getenv('UPLOAD_DIR').'/'.$this->user->getUsername())) {
-            // ugly, please fix :(
-            if (@explode('/', $this->currentPath)[1] != $this->user->getUsername()) {
+            if ($this->security->pathLogin($this->currentPath) != $this->user->getUsername()) {
                 $this->session->getFlashBag()->add('info', 'Please note that you can only upload files if you are in your own home directory. Click the "Go to my folder" button to always get there quickly.');
             }
             return true;
