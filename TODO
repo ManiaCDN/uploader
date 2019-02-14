@@ -1,8 +1,0 @@
-CSRF protection for uploader
-remove hardlink from cookieconsent.js
-Convert email template to html
-clickable path in browser (->boostrap breadcrumbs)
-bulk select for delete and block
-write a path class to stop the explode('/', $path) bullshit
-narrow down oauth scope to the necessary information
-write tests
