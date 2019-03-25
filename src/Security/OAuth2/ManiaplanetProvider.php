@@ -85,7 +85,7 @@ class ManiaplanetProvider extends AbstractProvider
      */
     protected function getDefaultScopes()
     {
-        return ['basic', 'titles', 'events', 'maps', 'email'];
+        return ['basic', 'email']; // more: 'titles', 'events', 'maps'
     }
 
     /**
