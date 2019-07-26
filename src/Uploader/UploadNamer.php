@@ -14,14 +14,6 @@ class UploadNamer implements NamerInterface
     
     public function __construct(RequestStack $requestStack, Path $path) {
         $this->requestStack = $requestStack;
-        
-        /*
-         * IMPORTANT!
-         * For some reason that's not clear to me (maybe because this
-         * service is public?) path is an existing object and NOT freshly
-         * instantiated. It is exactly the one that gets instantiated
-         * in the UploadValidationListener.
-         */
         $this->path = $path;
     }
     
@@ -38,8 +30,8 @@ class UploadNamer implements NamerInterface
         
         $filename = $file->getClientOriginalName();
         
-        //$this->path->setAlphanum(true);
-        //$this->path->fromString($rawpath);
+        $this->path->setAlphanum(true);
+        $this->path->fromString($raw_path);
         $fullpath = $this->path->append($filename);
         
         return $fullpath->getString();

@@ -14,7 +14,6 @@ namespace App\Controller;
 
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
-use App\Service\Security;
 use App\Service\Path;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Finder\Finder;
@@ -27,7 +26,6 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
     private $bfm;
     private $authChecker;
     private $fsm;
-    private $security;
     private $request;
     private $path;
     
@@ -52,13 +50,11 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
 
     public function show(BlockedFilesManager $bfm,
             AuthorizationCheckerInterface $authChecker,
-            FilesystemManager $fsm,
-            Security $security
+            FilesystemManager $fsm
     ) {
         $this->bfm = $bfm;
         $this->authChecker = $authChecker;
         $this->fsm = $fsm;
-        $this->security = $security;
         $this->request = Request::createFromGlobals();
         
         // parse the path into a Path object. Check for being in the base path included

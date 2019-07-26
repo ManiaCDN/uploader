@@ -15,7 +15,6 @@
 namespace App\Service;
 
 use App\Service\Mailer;
-use App\Service\Security;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class BlockedFilesManager
@@ -27,11 +26,9 @@ class BlockedFilesManager
     
     public function __construct(
             Mailer $mailer,
-            Security $security,
             SessionInterface $session
     ) {
         $this->mailer = $mailer;
-        $this->security = $security;
         $this->session = $session;
         
         $this->blocked_files_list = getenv('BLOCKED_FILES_LIST');

@@ -12,7 +12,6 @@
 namespace App\Service;
 
 use App\Service\BlockedFilesManager;
-use App\Service\Security;
 use App\Service\Path;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -22,7 +21,6 @@ use Symfony\Component\HttpFoundation\Request;
 class FilesystemManager
 {
     private $bfm;
-    private $security;
     private $user;
     private $session;
     private $request;
@@ -32,13 +30,11 @@ class FilesystemManager
     private $filesystem;
     
     public function __construct(BlockedFilesManager $bfm,
-            Security $security,
             TokenStorageInterface $tokenStorage,
             SessionInterface $session,
             \Twig_Environment $twig
     ) {
         $this->bfm = $bfm;
-        $this->security = $security;
         $this->user = $tokenStorage->getToken()->getUser();
         $this->session = $session;
         $this->request = Request::createFromGlobals();
