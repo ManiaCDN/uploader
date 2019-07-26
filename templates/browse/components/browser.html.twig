@@ -16,7 +16,7 @@
         </thead>
         <tbody>
             {% for item in list %}
-                {% set filepath = path ~ '/' ~ item.filename|trim('/') %}
+                {% set filepath = path.append(item.filename|trim('/')).getString %}
                 {% set block_disabled = not is_granted('ROLE_ADMIN') ? 'disabled' %}
                 <tr>
                     <!-- name -->
@@ -39,14 +39,14 @@
                     <!-- block -->
                     <td>
                         {% if item.isFile %}
-                            <input type="radio" {{ filepath in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="true"> no
-                            <input type="radio" {{ filepath not in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="false"> yes
+                            <input type="radio" {{ filepath in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="true">&nbsp;no
+                            <input type="radio" {{ filepath not in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="false">&nbsp;yes
                         {% endif %}
                     </td>
 
                     <!-- delete -->
                     <td>
-                        {% if isAllowedToWrite %}
+                        {% if path.isWritableBy(app.user) %}
                             <input type="checkbox" name="delete[{{ filepath }}]" value="true">
                         {% endif %}
                     </td>
@@ -55,7 +55,7 @@
                     <td>
                         {% if item.isFile %}
                             <a style="display:block; width:100%;" 
-                                href="{{ PUBLIC_UPLOAD_URL ~ '/' ~ filepath }}"
+                                href="{{ path.getPublicURL }}"
                             >Link</a>
                         {% endif %}
                     </td>

@@ -13,6 +13,7 @@ namespace App\Service;
 
 use App\Service\BlockedFilesManager;
 use App\Service\Security;
+use App\Service\Path;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -25,7 +26,7 @@ class FilesystemManager
     private $user;
     private $session;
     private $request;
-    private $currentPath;
+    //private $currentPath; disabled, used only by userHasFolder()
     private $twig;
     
     private $filesystem;
@@ -41,7 +42,7 @@ class FilesystemManager
         $this->user = $tokenStorage->getToken()->getUser();
         $this->session = $session;
         $this->request = Request::createFromGlobals();
-        $this->currentPath = $this->security->checkDirUp($this->request->query->get('path', ''));
+        //$this->currentPath = $this->security->checkDirUp($this->request->query->get('path', ''));
         $this->twig = $twig;
         
         $this->filesystem = new Filesystem();
@@ -103,15 +104,13 @@ class FilesystemManager
      * $pathname must look like user/dir/to/create
      * with the last element being the dir to be created 
      * 
-     * @param string $name
+     * @param string $path
      * @return bool
      */
-    public function createFolder(string $pathname): bool {
-        $pathname = $this->security->checkDirUp($pathname); // remove ../
-        $pathname = $this->cleanPath($pathname); // remove specialchars
-        $dirToCreate = getenv('UPLOAD_DIR').'/'.$pathname;
+    public function createFolder(Path $path): bool {
+        $dirToCreate = $path->getAbsolutePath();
         
-        if ($this->security->isAllowedToWrite($pathname, $this->user)
+        if ($path->isWritableBy($this->user)
             && !$this->filesystem->exists($dirToCreate)) {
             $this->filesystem->mkdir($dirToCreate);
             $this->session->getFlashBag()->add('success', 'Directory successfully created.');
@@ -123,30 +122,15 @@ class FilesystemManager
     }
     
     /**
-     * Removes special chars and replaces them with underscore.
-     * 
-     * @param string $path
-     * @return string
-     */
-    public function cleanPath(string $path): string {
-        $path = explode('/', $path);
-        if (is_array($path)) {
-            foreach ($path as &$part) {
-                //$part = str_replace(' ', '_', $part); // Replaces all spaces
-                $part = preg_replace('/[^A-Za-z0-9\-\.\_]/', '_', $part); // Removes special chars.
-            }
-            return implode('/', $path);
-        }
-    }
-    
-    /**
      * Check whether the user has his own folder yet.
+     * CURRENTLY UNUSED. Remove?
      * 
+     * @deprecated
      * @return bool
      */
-    public function userHasFolder(): bool {
+    /*public function userHasFolder(): bool {
         if ($this->filesystem->exists(getenv('UPLOAD_DIR').'/'.$this->user->getUsername())) {
-            if ($this->security->pathLogin($this->currentPath) != $this->user->getUsername()) {
+            if ($this->currentPath->getOwnerLogin() != $this->user->getUsername()) {
                 $this->session->getFlashBag()->add('info', 'Please note that you can only upload files if you are in your own home directory. Click the "Go to my folder" button to always get there quickly.');
             }
             return true;
@@ -156,14 +140,14 @@ class FilesystemManager
             $this->session->getFlashBag()->add('warning', $message);
             return false;
         }
-    }
+    }*/
     
     /**
      * Creates the user's own folder named by his/her own login
      */
     public function createUserFolder() {
         $this->filesystem->mkdir(getenv('UPLOAD_DIR').'/'.$this->user->getUsername());
-        $this->session->getFlashBag()->add('success', 'Folder successfully created. You will now find your own folder below. It\'s name is your Maniaplanet login.');
+        //$this->session->getFlashBag()->add('success', 'Folder successfully created. You will now find your own folder below. It\'s name is your Maniaplanet login.');
     }
     
     /**

@@ -15,12 +15,14 @@ namespace App\Controller;
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use App\Service\Security;
+use App\Service\Path;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
-class BrowseController extends AbstractController
+class BrowseController extends AbstractController implements ServiceSubscriberInterface
 {
     private $bfm;
     private $authChecker;
@@ -28,6 +30,25 @@ class BrowseController extends AbstractController
     private $security;
     private $request;
     private $path;
+    
+    public function __construct()
+    {
+        
+    }
+    
+    /**
+     * Make the path service available through $this->get().
+     * See: https://symfony.com/doc/current/service_container/service_subscribers_locators.html#defining-a-service-subscriber
+     * It must inherit the services from the AbstractController.
+     * 
+     * @return array
+     */
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(parent::getSubscribedServices(), [
+            'path' => Path::class,
+        ]);
+    }
 
     public function show(BlockedFilesManager $bfm,
             AuthorizationCheckerInterface $authChecker,
@@ -39,7 +60,14 @@ class BrowseController extends AbstractController
         $this->fsm = $fsm;
         $this->security = $security;
         $this->request = Request::createFromGlobals();
-        $this->path = $this->security->checkDirUp($this->request->query->get('path', ''));
+        
+        // parse the path into a Path object. Check for being in the base path included
+        // trim / as they don't have any importance but would cause some special
+        // handling if they were taken to the path
+        $this->path = $this->get('path');
+        $this->path->setAlphanum(true);
+        $this->path->fromString(trim($this->request->query->get('path', '.'), '/'));
+        
         
         // (un-)blocks files, deletes files
         $this->blockDeleteAction();
@@ -47,21 +75,15 @@ class BrowseController extends AbstractController
         // create folder
         $this->createFolderAction();
 
-        // create user folder
-        $this->createUserFolderAction();
-        
-        // no folder yet? ask the user to create it
-        $this->fsm->userHasFolder();
+        // create user folder in case it isn't created yet
+        $this->fsm->createUserFolder();
         
         $list = $this->makeList($this->path);
         
         return $this->render('browse/index.html.twig', [
-            'path'              => trim($this->path, '/'),
-            'onedirup'          => trim(dirname($this->path, 1), '.'),
-            'PUBLIC_UPLOAD_URL' => getenv('PUBLIC_UPLOAD_URL'),
+            'path'              => $this->path,
             'list'              => $list,
             'blocklist'         => $this->bfm->read(false),
-            'isAllowedToWrite'  => $this->security->isAllowedToWrite($this->path, $this->getUser()),
         ]);
     }
     
@@ -76,7 +98,7 @@ class BrowseController extends AbstractController
         $token  = $this->request->request->get('token');
         $submit = $this->request->request->get('submit_block-delete', false);
         
-        // only continue if there is somethign to do
+        // only continue if there is something to do
         if (false === $submit) {
             return;
         }
@@ -108,7 +130,7 @@ class BrowseController extends AbstractController
                 throw new \Exception('CSRF token invalid!');
             }
             
-            $this->fsm->createFolder($this->path.'/'.$folder);
+            $this->fsm->createFolder($this->path->append($folder));
         }
     }
     
@@ -131,13 +153,13 @@ class BrowseController extends AbstractController
      * @param string $path
      * @return Finder
      */
-    private function makeList(string $path): Finder {
+    private function makeList(Path $path): Finder {
         $finder = new Finder();
         
         $list = $finder
                 ->depth('== 0') // don't recurse deeper
                 ->sortByType() // show directories first, then files
-                ->in(getenv('UPLOAD_DIR').'/'.$path); // finally give the path and run
+                ->in($path->getAbsolutePath()); // finally give the path and run
         
         return $list;
     }

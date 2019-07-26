@@ -1,4 +1,4 @@
-{% if isAllowedToWrite %}
+{% if path.isWritableBy(app.user) %}
     {% block stylesheets %}
     <link href="{{ asset('css/dropzone.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/dropzone_basic.css') }}" rel="stylesheet" />

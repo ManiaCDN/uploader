@@ -2,20 +2,27 @@
 
 namespace App\Uploader;
 
-use App\Service\FilesystemManager;
+use App\Service\Path;
 use Oneup\UploaderBundle\Uploader\File\FileInterface;
 use Oneup\UploaderBundle\Uploader\Naming\NamerInterface;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class UploadNamer implements NamerInterface
 {
     private $requestStack;
-    private $fsm;
+    private $path;
     
-    public function __construct(RequestStack $requestStack, FilesystemManager $fsm) {
+    public function __construct(RequestStack $requestStack, Path $path) {
         $this->requestStack = $requestStack;
-        $this->fsm = $fsm;
+        
+        /*
+         * IMPORTANT!
+         * For some reason that's not clear to me (maybe because this
+         * service is public?) path is an existing object and NOT freshly
+         * instantiated. It is exactly the one that gets instantiated
+         * in the UploadValidationListener.
+         */
+        $this->path = $path;
     }
     
     /**
@@ -27,13 +34,14 @@ class UploadNamer implements NamerInterface
     public function name(FileInterface $file)
     {
         $request = $this->requestStack->getCurrentRequest();
-        $raw_path = $request->get('path');
+        $raw_path = trim($request->get('path'), '/');
         
-        $path = trim($raw_path, '/');
-        $filename = $this->fsm->cleanPath($file->getClientOriginalName()); // remove spaces and specialchars
-        return sprintf('%s/%s',
-            $path,
-            $filename
-        );
+        $filename = $file->getClientOriginalName();
+        
+        //$this->path->setAlphanum(true);
+        //$this->path->fromString($rawpath);
+        $fullpath = $this->path->append($filename);
+        
+        return $fullpath->getString();
     }
 }

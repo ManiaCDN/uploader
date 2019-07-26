@@ -71,8 +71,9 @@ class BlockedFilesManager
             $pathname = trim($pathname, '/');
             // smart recognition of strings like 'false', 'yes' ...
             $block = filter_var($block, FILTER_VALIDATE_BOOLEAN);
-            $owner = $this->security->pathLogin($pathname);
+            $owner = explode('/', ltrim($pathname, '/'))[0];
             
+            // only record those where there actually was a change
             if (true == $block && !isset($filesBlocked[$pathname])) {
                 // should be blocked
                 // add this path. uniqid() needed, because we need a

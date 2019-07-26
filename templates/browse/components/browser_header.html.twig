@@ -1,5 +1,5 @@
-<a href="{{ app.request.pathinfo ~ '?path=' ~ onedirup }}" class="btn btn-primary">
-    <span class="glyphicon glyphicon-circle-arrow-up"></span> Parent folder 
+<a href="{{ app.request.pathinfo ~ '?path=/' ~ path.getParentPath.getString }}" class="btn btn-primary">
+    <span class="glyphicon glyphicon-circle-arrow-up"></span> Parent folder
 </a>
 
 <a href="{{ app.request.pathinfo ~ '?path=/' ~ app.user.username }}" class="btn btn-default">
@@ -10,4 +10,4 @@
     <span class="glyphicon glyphicon-refresh"></span> Refresh 
 </a>
 
-You are here: {{ path ?: 'user overview' }}
+You are here: {{ path.getString ?: 'user overview' }}

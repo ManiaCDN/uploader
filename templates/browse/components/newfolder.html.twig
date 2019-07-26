@@ -1,4 +1,4 @@
-{% if isAllowedToWrite %}
+{% if path.isWritableBy(app.user) %}
     <form method="post" action="{{ app.request.uri }}" class="form-inline">
         <div class="form-group">
             <input type="hidden" name="token" value="{{ csrf_token('browse_newfolder') }}" />

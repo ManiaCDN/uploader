@@ -7,7 +7,7 @@
 
 namespace App\EventListener;
 
-use App\Service\Security;
+use App\Service\Path;
 use Oneup\UploaderBundle\Event\ValidationEvent;
 use Oneup\UploaderBundle\Uploader\Exception\ValidationException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
@@ -18,51 +18,40 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 class UploadValidationListener
 {
     private $tokenStorage;
-    private $security;
+    private $path;
     private $authChecker;
     
     public function __construct(
             TokenStorage $tokenStorage,
-            Security $security,
+            Path $path,
             AuthorizationCheckerInterface $authChecker
     ) {
         $this->tokenStorage = $tokenStorage;
-        $this->security = $security;
+        $this->path = $path;
         $this->authChecker = $authChecker;
     }
     
+    /*
+     * Checks if 
+     * 1) User ist logged in
+     * 2) Path doesn't escape the upload dir (checked automatically
+     *    within the path class)
+     * 3) The user is uploading within his own directory
+     */
     public function onValidate(ValidationEvent $event)
     {
         if (!$this->authChecker->isGranted('ROLE_USER')) {
             throw new AccessDeniedException('Only logged in users allowed to upload!');
         }
         
-        $login = $this->tokenStorage->getToken()->getUser()->getUsername();
+        $user = $this->tokenStorage->getToken()->getUser();
         $request = $event->getRequest();
-        $raw_path = $request->get('path');
+        $raw_path = trim($request->get('path'), '/');
         
-        $this->checkPath($raw_path, $login);
-    }
-    
-    /**
-     * Checks:
-     * 1) if user tries to use ../
-     * 2) if the path from the request starts with the login
-     * 
-     * @param string $raw_path
-     * @param string $login
-     * @throws ValidationException
-     * @return boolean
-     */
-    private function checkPath(string $path, string $login)
-    {
-        // step 1)
-        if (false === $this->security->checkDirUp($path, false)) {
-            throw new ValidationException('Usage of ../ not allowed! Please report this bug or stop cracking.');
-        }
+        $this->path->setAlphanum(true);
+        $this->path->fromString($raw_path); // check 2) happens inside here
         
-        //step 2)
-        if ($login != $this->security->pathLogin($path)) {
+        if (!$this->path->isWritableBy($user)) {
             throw new ValidationException('Uploading outside user\'s directory is not allowed.');
         }
     }
