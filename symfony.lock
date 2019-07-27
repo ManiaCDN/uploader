@@ -2,6 +2,9 @@
     "aptoma/twig-markdown": {
         "version": "3.0.0"
     },
+    "ckr/arraymerger": {
+        "version": "dev-master"
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {

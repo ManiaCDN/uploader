@@ -1,16 +1,19 @@
 <?php
 namespace App\EventListener;
 
+use App\Service\Path;
 use App\Service\BlockedFilesManager;
 use Oneup\UploaderBundle\Event\PostPersistEvent;
 
 class UploadListener
 {
     private $bfm;
+    private $path;
 
-    public function __construct(BlockedFilesManager $bfm)
+    public function __construct(BlockedFilesManager $bfm, Path $path)
     {
         $this->bfm = $bfm;
+        $this->path = $path;
     }
     
     /**
@@ -26,17 +29,12 @@ class UploadListener
         $request = $event->getRequest();
         $file    = $event->getFile();
         
-        $pathname = sprintf('%s/%s',
-            $request->get('path'),
-            $file->getBasename()
-        );
+        $this->path->fromString($request->get('path'));
+        $this->path = $this->path->append($file->getBasename());
+        $this->path->setBlocked(true);
         
         // block the file from public access
-        // block() expects and array and second param
-        // indicates whether an unblock mail should be send
-        $this->bfm->block([
-            $pathname => true
-        ], false);
+        $this->bfm->block([$this->path]);
         
         //if everything went fine
         $response = $event->getResponse();

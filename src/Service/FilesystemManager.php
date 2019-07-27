@@ -24,7 +24,6 @@ class FilesystemManager
     private $user;
     private $session;
     private $request;
-    //private $currentPath; disabled, used only by userHasFolder()
     private $twig;
     
     private $filesystem;
@@ -38,7 +37,6 @@ class FilesystemManager
         $this->user = $tokenStorage->getToken()->getUser();
         $this->session = $session;
         $this->request = Request::createFromGlobals();
-        //$this->currentPath = $this->security->checkDirUp($this->request->query->get('path', ''));
         $this->twig = $twig;
         
         $this->filesystem = new Filesystem();
@@ -49,36 +47,50 @@ class FilesystemManager
      * - makes sure the logged in user has permission to do so.
      * - unblocks the file
      * 
-     * $files must be constructed with the
-     * KEY being the filename (!)
-     * value being whatever you like
+     * $files is an array of Path objects.
+     * Each object must have the delete attribute set
+     * to determine, if it should be deleted
+     * 
+     * Returns an array containing the paths as strings
+     * where changes were made.
+     * Structure:
+     * "login" => [
+     *   "path/to/file" => *string of what happened to the file*
+     * ]
      * 
      * @param array $files
-     * @return bool|null
+     * @return array
      */
-    public function delete(array $files): ?bool
+    public function delete(array $files): array
     {
         if (empty($files)) {
-            return null;
+            return [];
         }
         
         $unblocklist = array();
+        $changelog = array();
         
-        foreach ($files as $pathname => $value) {
-            $pathname = $this->security->checkDirUp($pathname); // strip ../
-            $fullPath = getenv('UPLOAD_DIR').'/'.$pathname;
+        foreach ($files as $path) {
+            $pathname = $path->getString();
+            $owner = $path->getOwnerLogin();
+            $fullPath = $path->getAbsolutePath();
             
-            // check if any of the pathnames aren't allowed to be written
-            if (!$this->security->isAllowedToWrite($pathname, $this->user)) {
-                $this->session->getFlashBag()->add('danger', 'You\'re not allowed to delete files here.');
-                return false;
+            // check if any of the pathnames aren't allowed to be written.
+            // only checks for user roles, not in the file system
+            if (!$path->isWritableBy($this->user)) {
+                $this->session->getFlashBag()->add('danger', 'You\'re not allowed to delete this file: '.$pathname);
+                continue;
             }
             
-            if (is_dir($fullPath)) {
-                if (!$this->isDirEmpty($fullPath)) {
-                    $this->session->getFlashBag()->add('warning', 'Only empty folders can be deleted.');
-                    return false;
-                }
+            // check if file or directory exists and if it can be deleted
+            if (!is_writable($fullPath)) {
+                $this->session->getFlashBag()->add('warning', '"'.$pathname.'" cannot be deleted because it either doesn\'t exist or writing permissions are missing.');
+                continue;
+            }
+            
+            if (is_dir($fullPath) && !$this->isDirEmpty($fullPath)) {
+                $this->session->getFlashBag()->add('warning', 'Only empty folders can be deleted. Please delete all files inside "'.$pathname.'" first.');
+                continue;
             }
             
             //remove
@@ -86,13 +98,17 @@ class FilesystemManager
             
             // unblock (false means to unblock)
             // if it is deleted, it doesn't need to be blocked anymore
-            $unblocklist[$pathname] = false;
+            $path->setBlocked(false); // whatever it was before, now it will be blocked
+            $unblocklist[] = $path;
+            $changelog[$owner][$pathname] = 'deleted';
         }
         
-        $this->bfm->block($unblocklist, false); // second param: user should not (false) be informed
+        // unblock now
+        $this->bfm->block($unblocklist);
+        
         $this->session->getFlashBag()->add('success', count($unblocklist).' file(s) were deleted.');
         
-        return true;
+        return $changelog;
     }
     
     /**
@@ -100,7 +116,7 @@ class FilesystemManager
      * $pathname must look like user/dir/to/create
      * with the last element being the dir to be created 
      * 
-     * @param string $path
+     * @param Path $path
      * @return bool
      */
     public function createFolder(Path $path): bool {
@@ -118,32 +134,10 @@ class FilesystemManager
     }
     
     /**
-     * Check whether the user has his own folder yet.
-     * CURRENTLY UNUSED. Remove?
-     * 
-     * @deprecated
-     * @return bool
-     */
-    /*public function userHasFolder(): bool {
-        if ($this->filesystem->exists(getenv('UPLOAD_DIR').'/'.$this->user->getUsername())) {
-            if ($this->currentPath->getOwnerLogin() != $this->user->getUsername()) {
-                $this->session->getFlashBag()->add('info', 'Please note that you can only upload files if you are in your own home directory. Click the "Go to my folder" button to always get there quickly.');
-            }
-            return true;
-        } else {
-            // this template contains a button which offers to create the folder
-            $message = $this->twig->render('flashes/no_user_folder.html.twig');
-            $this->session->getFlashBag()->add('warning', $message);
-            return false;
-        }
-    }*/
-    
-    /**
      * Creates the user's own folder named by his/her own login
      */
     public function createUserFolder() {
         $this->filesystem->mkdir(getenv('UPLOAD_DIR').'/'.$this->user->getUsername());
-        //$this->session->getFlashBag()->add('success', 'Folder successfully created. You will now find your own folder below. It\'s name is your Maniaplanet login.');
     }
     
     /**

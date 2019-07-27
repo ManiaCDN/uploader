@@ -26,11 +26,10 @@ class UploadNamer implements NamerInterface
     public function name(FileInterface $file)
     {
         $request = $this->requestStack->getCurrentRequest();
-        $raw_path = trim($request->get('path'), '/');
+        $raw_path = $request->get('path');
         
         $filename = $file->getClientOriginalName();
         
-        $this->path->setAlphanum(true);
         $this->path->fromString($raw_path);
         $fullpath = $this->path->append($filename);
         

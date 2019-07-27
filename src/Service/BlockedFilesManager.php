@@ -14,83 +14,67 @@
 
 namespace App\Service;
 
-use App\Service\Mailer;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class BlockedFilesManager
 {
-    private $mailer;
     private $session;
     
     private $blocked_files_list;
     
     public function __construct(
-            Mailer $mailer,
             SessionInterface $session
     ) {
-        $this->mailer = $mailer;
         $this->session = $session;
         
         $this->blocked_files_list = getenv('BLOCKED_FILES_LIST');
     }
     
     /**
-     * Takes an array of files to be blocked or unblocked
+     * Takes an array of App\Service\Path's to be blocked or unblocked.
+     * There are attributes of Path indicating whether
+     * it should be blocked.
+     * 
+     * Returns an array containing the paths as strings
+     * where changes were made.
      * Structure:
-     * filename => (bool)
-     * While the boolean value indicates whether the file is blocked
-     * true: blocked; false: not blocked
-     * 
-     * Second argument is whether the owner of the affected files
-     * should be notified by email about the change.
-     * This is set to false e.g. when a new file is uploaded,
-     * as the upload also triggers an initial block.
-     * 
-     * Returns
-     * - null if the given array was empty
-     * - false if one value in $files is not boolean
-     * - true on success
+     * "login" => [
+     *   "path/to/file" => *string of what happened to the file*
+     * ]
      * 
      * @param array $files
-     * @param bool $informOwner
-     * @return bool|null
+     * @return array Changes made
      */
-    public function block(array $files, bool $informOwner): ?bool
+    public function block(array $files): array
     {
         if (empty($files)) {
-            return null;
+            return [];
         }
         
         $filesBlocked = $this->read();
         $changes = array(); // record which files are affected
         
-        foreach ($files as $pathname => $block) {
-            $pathname = trim($pathname, '/');
-            // smart recognition of strings like 'false', 'yes' ...
-            $block = filter_var($block, FILTER_VALIDATE_BOOLEAN);
-            $owner = explode('/', ltrim($pathname, '/'))[0];
+        foreach ($files as $path) {
+            $pathname = $path->getString();
+            $owner = $path->getOwnerLogin();
             
             // only record those where there actually was a change
-            if (true == $block && !isset($filesBlocked[$pathname])) {
+            if (true == $path->getBlocked() && !isset($filesBlocked[$pathname])) {
                 // should be blocked
                 // add this path. uniqid() needed, because we need a
                 // key for flipping back (which has to be unique,
                 // in order not to overwrite other keys)
                 $filesBlocked[$pathname] = uniqid();
-                $changes[$owner][$pathname] = true;
-            } elseif (false == $block && isset($filesBlocked[$pathname])) {
+                $changes[$owner][$pathname] = 'rejected';
+            } elseif (false == $path->getBlocked() && isset($filesBlocked[$pathname])) {
                 unset($filesBlocked[$pathname]);
-                $changes[$owner][$pathname] = false;
+                $changes[$owner][$pathname] = 'approved';
             }
         }
         
         $this->write($filesBlocked);
         
-        if ($informOwner) {
-            $this->mailer->blockMessage($changes);
-        }
-        
-        return true;
+        return $changes;
     }
 
     /**

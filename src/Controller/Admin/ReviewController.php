@@ -12,29 +12,50 @@ namespace App\Controller\Admin;
 
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
+use App\Service\Mailer;
+use App\Service\Path;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Ckr\Util\ArrayMerger;
 
-class ReviewController extends AbstractController
+class ReviewController extends AbstractController implements ServiceSubscriberInterface
 {
     private $bfm;
     private $fsm;
     private $request;
     private $authChecker;
+    private $mailer;
     
     public function __construct(
             BlockedFilesManager $bfm,
             FilesystemManager $fsm,
-            AuthorizationCheckerInterface $authChecker
+            AuthorizationCheckerInterface $authChecker,
+            Mailer $mailer
     ) {
         $this->bfm = $bfm;
         $this->fsm = $fsm;
         $this->authChecker = $authChecker;
+        $this->mailer = $mailer;
         $this->request = Request::createFromGlobals();
+    }
+    
+    /**
+     * Make the path service available through $this->get().
+     * See: https://symfony.com/doc/current/service_container/service_subscribers_locators.html#defining-a-service-subscriber
+     * It must inherit the services from the AbstractController.
+     * 
+     * @return array
+     */
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(parent::getSubscribedServices(), [
+            'path' => Path::class,
+        ]);
     }
     
     public function show()
@@ -82,11 +103,11 @@ class ReviewController extends AbstractController
      */
     private function blockDeleteAction()
     {
-        $blocks = $this->request->request->get('block', array());
-        $delete = $this->request->request->get('delete', array());
+        $blocks_raw = $this->request->request->get('block', array());
+        $delete_raw = $this->request->request->get('delete', array());
         $token  = $this->request->request->get('token');
         
-        if (empty($blocks)) {
+        if (empty($blocks_raw)) {
             // blocks will always list at least one file, if the folder wasn't empty
             // and user still pressed update button. nothing to do here
             return;
@@ -96,12 +117,30 @@ class ReviewController extends AbstractController
             throw new \Exception('CSRF token invalid!');
         }
         
-        // block
-        if (true === $this->authChecker->isGranted('ROLE_ADMIN')) {
-            $this->bfm->block($blocks, true); // second param: inform user by email
+        // block:
+        $blocks = [];
+        foreach ($blocks_raw as $name => $status) {
+            $tmp = $this->get('path'); // retrieve new instance
+            $tmp->fromString($name);
+            $tmp->setBlocked(filter_var($status, FILTER_VALIDATE_BOOLEAN));
+            $blocks[] = $tmp;
         }
+        $block_changelog = $this->bfm->block($blocks);
         
         // delete
-        $this->fsm->delete($delete);
+        $delete = [];
+        foreach ($delete_raw as $name => $status) {
+            $tmp = $this->get('path'); // retrieve new instance
+            $tmp->fromString($name);
+            $tmp->setDelete(filter_var($status, FILTER_VALIDATE_BOOLEAN));
+            $delete[] = $tmp;
+        }
+        $delete_changelog = $this->fsm->delete($delete);
+        
+        // using this library because php's array_merge_recursive merges
+        // duplicates into another array as described here:
+        // https://www.php.net/manual/en/function.array-merge-recursive.php#92195
+        $changelog = ArrayMerger::doMerge($block_changelog, $delete_changelog);
+        $this->mailer->sendReviewNotification($changelog);
     }
 }

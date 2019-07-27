@@ -1,0 +1,18 @@
+Hello {{ recipient }}!
+
+We have taken time to approve your recent upload.
+Usually the time from upload until review is less than 24 hours,
+though we might take a bit longer sometimes.
+Below you find a list of the files we have approved. If one of them
+is not approved, it has likely violated the upload terms.
+In this case, read our terms again please. You can find them
+on the uploader home page. If you are still not sure what is
+wrong, please reply to this email.
+
+The ManiaCDN team
+
+
+Changes were made to the following files:
+{% for file,change in files %}
+    '{{ file }}' got {{ change }}
+{% endfor %}

@@ -19,27 +19,37 @@ class Path {
      * Root path is represented by a one-key array with the value being an empty
      * string.
      */
-    private $path = null;
+    private $path;
     
-    // whether to replace all non alpha numeric characters on read.
-    private $alphanum = null;
+    // metadata for usage by other classes, not used in this class
+    /**
+     * @var bool true if the file is / should be blocked
+     */
+    private $blocked;
+    
+    /**
+     * @var bool true if the file is / should be deleted
+     */
+    private $delete;
     
     public function __construct() {
         
     }
     
-    /**
-     * Sets whether only alphanumeric are allowed to be set.
-     * 
-     * @param bool $alphnum
-     * @return void
-     */
-    public function setAlphanum(bool $alphnum): void {
-        if ($this->alphanum != null) {
-            throw new \Exception('Setting alphanum can only be done once.');
-        }
-        
-        $this->alphanum = $alphnum;
+    public function setBlocked(bool $var) {
+        $this->blocked = $var;
+    }
+    
+    public function getBlocked(): bool {
+        return $this->blocked;
+    }
+    
+    public function setDelete(bool $var) {
+        $this->delete = $var;
+    }
+    
+    public function getDelete(): bool {
+        return $this->delete;
     }
     
     /**
@@ -52,10 +62,7 @@ class Path {
      * @throws \Exception
      */
     public function fromString(string $s): void {
-        if ($this->alphanum == null) {
-            throw new \Exception('You must set alphanum before!');
-        }
-        
+        $s = trim($s, '/');
         $s = self::cleanPath($s, true);
         $this->path = explode('/', PU::canonicalize($s));
         if (!$this->isLegal()) {
@@ -159,13 +166,14 @@ class Path {
      * No slashes allowed!
      * 
      * @param string $with
-     * @return $this
+     * @return clone
      * @throws \Exception
      */
     public function append(string $with) {
         if (strpos($with, '/')) {
             throw new \Exception('Paths may only be appended with atoms. No slashes allowed.');
         }
+        
         $with = self::cleanPath($with, false);
         
         $clone = clone $this;
@@ -220,7 +228,7 @@ class Path {
     }
     
     /**
-     * True if path is root
+     * True if path is root folder
      * 
      * @return bool
      */
@@ -232,10 +240,11 @@ class Path {
      * Removes special chars and replaces them with underscore.
      * 
      * @param string $path
+     * @param bool $acceptslashes
      * @return string
      */
-    public static function cleanPath(string $path, bool $escapeslashes): string {
-        if ($escapeslashes) {
+    public static function cleanPath(string $path, bool $acceptslashes): string {
+        if ($acceptslashes) {
             return preg_replace('/[^A-Za-z0-9-._\/]/', '_', $path);
         }
         else {

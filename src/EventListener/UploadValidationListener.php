@@ -46,9 +46,8 @@ class UploadValidationListener
         
         $user = $this->tokenStorage->getToken()->getUser();
         $request = $event->getRequest();
-        $raw_path = trim($request->get('path'), '/');
+        $raw_path = $request->get('path');
         
-        $this->path->setAlphanum(true);
         $this->path->fromString($raw_path); // check 2) happens inside here
         
         if (!$this->path->isWritableBy($user)) {

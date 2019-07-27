@@ -14,12 +14,14 @@ namespace App\Controller;
 
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
+use App\Service\Mailer;
 use App\Service\Path;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Ckr\Util\ArrayMerger;
 
 class BrowseController extends AbstractController implements ServiceSubscriberInterface
 {
@@ -50,19 +52,21 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
 
     public function show(BlockedFilesManager $bfm,
             AuthorizationCheckerInterface $authChecker,
-            FilesystemManager $fsm
+            FilesystemManager $fsm,
+            Mailer $mailer
+            
     ) {
         $this->bfm = $bfm;
         $this->authChecker = $authChecker;
         $this->fsm = $fsm;
+        $this->mailer = $mailer;
         $this->request = Request::createFromGlobals();
         
         // parse the path into a Path object. Check for being in the base path included
         // trim / as they don't have any importance but would cause some special
         // handling if they were taken to the path
         $this->path = $this->get('path');
-        $this->path->setAlphanum(true);
-        $this->path->fromString(trim($this->request->query->get('path', '.'), '/'));
+        $this->path->fromString($this->request->query->get('path', '.'));
         
         
         // (un-)blocks files, deletes files
@@ -89,8 +93,8 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
      * @throws \Exception
      */
     private function blockDeleteAction() {
-        $blocks = $this->request->request->get('block', array());
-        $delete = $this->request->request->get('delete', array());
+        $blocks_raw = $this->request->request->get('block', array());
+        $delete_raw = $this->request->request->get('delete', array());
         $token  = $this->request->request->get('token');
         $submit = $this->request->request->get('submit_block-delete', false);
         
@@ -103,13 +107,38 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
             throw new \Exception('CSRF token invalid!');
         }
         
-        // block
+        // block: only for admins
         if (true === $this->authChecker->isGranted('ROLE_ADMIN')) {
-            $this->bfm->block($blocks, true); // second param: inform user by email
+            // generate paths
+            $blocks = [];
+        
+            foreach ($blocks_raw as $name => $status) {
+                $tmp = $this->get('path'); // retrieve new instance
+                $tmp->fromString($name);
+                $tmp->setBlocked(filter_var($status, FILTER_VALIDATE_BOOLEAN));
+                $blocks[] = $tmp;
+            }
+            $block_changelog = $this->bfm->block($blocks);
         }
         
         // delete
-        $this->fsm->delete($delete);
+        $delete = [];
+        foreach ($delete_raw as $name => $status) {
+            $tmp = $this->get('path'); // retrieve new instance
+            $tmp->fromString($name);
+            $tmp->setDelete(filter_var($status, FILTER_VALIDATE_BOOLEAN));
+            $delete[] = $tmp;
+        }
+        $delete_changelog = $this->fsm->delete($delete);
+        
+        // if an admin executed the action, send a notification
+        if (true === $this->authChecker->isGranted('ROLE_ADMIN')) {
+            // using this library because php's array_merge_recursive merges
+            // duplicates into another array as described here:
+            // https://www.php.net/manual/en/function.array-merge-recursive.php#92195
+            $changelog = ArrayMerger::doMerge($block_changelog, $delete_changelog);
+            $this->mailer->sendReviewNotification($changelog);
+        }
     }
     
     /**
@@ -127,19 +156,6 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
             }
             
             $this->fsm->createFolder($this->path->append($folder));
-        }
-    }
-    
-    /**
-     * Creates the specific folder for the logged in user.
-     * No user input here.
-     * Just passing through ...
-     * 
-     * @return bool
-     */
-    private function createUserFolderAction() {
-        if ($this->request->request->get('createuserfolder', false)) {
-            return $this->fsm->createUserFolder();
         }
     }
     
