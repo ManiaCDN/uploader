@@ -1,7 +1,7 @@
 {% if path.isWritableBy(app.user) %}
     {% block stylesheets %}
-    <link href="{{ asset('css/dropzone.css') }}" rel="stylesheet" />
-    <link href="{{ asset('css/dropzone_basic.css') }}" rel="stylesheet" />
+    <link href="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/css/dropzone.css') }}" rel="stylesheet" />
+    <link href="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/css/dropzone_basic.css') }}" rel="stylesheet" />
     {% endblock %}
 
     {% block body %}
@@ -10,7 +10,7 @@
     {% endblock %}
 
     {% block javascripts %}
-    <script type="text/javascript" src="{{ asset('js/dropzone.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/js/dropzone.js') }}"></script>
     <script type="text/javascript" src="{{ asset('js/dropzone.config.js') }}"></script>
     {% endblock %}
 {% endif %}
