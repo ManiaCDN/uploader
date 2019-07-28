@@ -1,0 +1,7 @@
+parameters:
+    paths:
+        - src
+    autoload_directories:
+        - %rootDir%/../../../src/Migrations
+    symfony:
+        container_xml_path: '%rootDir%/../../../var/cache/dev/srcApp_KernelDevDebugContainer.xml'

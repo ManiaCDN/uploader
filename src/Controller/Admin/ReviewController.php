@@ -87,7 +87,7 @@ class ReviewController extends AbstractController implements ServiceSubscriberIn
         
         $response = new BinaryFileResponse($pathname);
         $response->headers->set('Content-Type', $finfo->file($pathname));
-        $response->headers->set('Content-Length', $spl->getSize());
+        $response->headers->set('Content-Length', (string) $spl->getSize());
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             basename($file)

@@ -16,11 +16,7 @@ use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 
 class ManiaplanetResourceOwner implements ResourceOwnerInterface
 {
-    /**
-     * Raw response payload.
-     *
-     * @var
-     */
+    
     protected $response;
 
     public function __construct($response)

@@ -10,6 +10,7 @@
 
 namespace App\Entity;
 
+use App\Security\OAuth2\ManiaplanetResourceOwner;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -72,7 +73,7 @@ class ManiaplanetUser implements UserInterface, \Serializable
     public function getPassword()
     {
         // we are using tokens, no passwords
-        return null;
+        return "";
     }
     
     public function eraseCredentials()
@@ -84,10 +85,10 @@ class ManiaplanetUser implements UserInterface, \Serializable
      * Used when user logs in to update the database (e.g. email has changed)
      * Returns true if any of the vars below has changed its value (triggers db update)
      * 
-     * @param type $maniaplanetUser
+     * @param ManiaplanetResourceOwner $maniaplanetUser
      * @return boolean
      */
-    public function updateFromManiaplanetUser($maniaplanetUser) {
+    public function updateFromManiaplanetUser(ManiaplanetResourceOwner $maniaplanetUser) {
         $change = false;
         
         if ($this->email != $maniaplanetUser->getEmail()) {

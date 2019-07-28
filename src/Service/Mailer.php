@@ -19,6 +19,7 @@ class Mailer
     private $userRepository;
     private $twig;
     private $adminEmail;
+    private $session;
     
     public function __construct(\Swift_Mailer $mailer,
             ManiaplanetUserRepository $userRepository,

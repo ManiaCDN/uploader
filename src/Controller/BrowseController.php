@@ -30,6 +30,7 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
     private $fsm;
     private $request;
     private $path;
+    private $mailer;
     
     public function __construct()
     {
@@ -119,6 +120,8 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
                 $blocks[] = $tmp;
             }
             $block_changelog = $this->bfm->block($blocks);
+        } else {
+            $block_changelog = [];
         }
         
         // delete
@@ -162,7 +165,7 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
     /**
      * Use Symfony's Finder component to get a directory listing
      * 
-     * @param string $path
+     * @param Path $path
      * @return Finder
      */
     private function makeList(Path $path): Finder {

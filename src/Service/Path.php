@@ -109,7 +109,7 @@ class Path {
      * $n = 0 is the current folder
      * 
      * @param int $n
-     * @return \self
+     * @return Path
      * @throws \Exception
      */
     public function getParentPath(int $n = 1): self {
@@ -166,10 +166,10 @@ class Path {
      * No slashes allowed!
      * 
      * @param string $with
-     * @return clone
+     * @return Path a clone of $this
      * @throws \Exception
      */
-    public function append(string $with) {
+    public function append(string $with): self {
         if (strpos($with, '/')) {
             throw new \Exception('Paths may only be appended with atoms. No slashes allowed.');
         }
