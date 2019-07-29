@@ -105,25 +105,19 @@ class Path {
      * $n levels above the current one.
      * If $n exceeds the depth of the path it returns the root.
      * examples
-     * $n = 1 means the immediate parent,
-     * $n = 0 is the current folder
+     * $n = -1 (default) means the immediate parent path,
+     * $n = 1 is the uppermost folder's path,
+     * $n = 2 is the second path
+     * $n > depth will return the full path
      * 
      * @param int $n
      * @return Path
      * @throws \Exception
      */
-    public function getParentPath(int $n = 1): self {
-        if ($n < 0) {
-            throw new \Exception('getParentPath() received an invalid argument: '.$n.'. $n might not be negative.');
-        }
-        
+    public function getParentPath(int $n = -1): self {
         $parent = clone $this;
-        if ($n >= $this->getDepth()) {
-            $parent->path = ['']; // root
-        }
-        else {
-            $parent->path = array_slice($this->path, 0, - $n); // cut array from behind
-        }
+        
+        $parent->path = array_slice($this->path, 0, $n);
         
         return $parent;
     }
@@ -151,14 +145,19 @@ class Path {
     /**
      * Return the depth of the path
      * Examples:
-     * 0: should not occur
+     * 0: is root folder
      * 1: foo
      * 2: /foo, foo/, foo/bar
      * 
      * @return int
      */
     public function getDepth(): int {
-        return count($this->path);
+        if ($this->isRoot()) {
+            return 0;
+        }
+        else {
+            return count($this->path);
+        }
     }
     
     /**

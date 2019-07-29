@@ -1,34 +1,55 @@
 <nav class="navbar navbar-default">
-    <div class="container-fluid">
+    <div class="container container-fluid">
         <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar_collapse" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
             <a class="navbar-brand" href="{{ path('homepage') }}">ManiaCDN</a>
         </div>
-        <ul class="nav navbar-nav">
-            <!--<li class="active"><a href="#">Home</a></li>-->
-            <li><a href="{{ path('homepage') }}">Home</a></li>
-            <li><a href="{{ path('browse') }}">Browse & Upload</a></li>
-            <li><a href="{{ path('privacy') }}">Privacy</a></li>
-            {% if is_granted('ROLE_ADMIN') %}
-                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin
-                    <span class="caret"></span></a>
-                    <ul class="dropdown-menu">
-                        <li><a href="{{ path('admin_review') }}">Review</a></li>
-                        <li><a href="{{ path('admin_users') }}">Users</a></li>
-                        <li><a href="{{ path('admin_settings') }}">Settings</a></li>
-                    </ul>
-                </li>
-            {% endif %}
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-            {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
-                <li><a href="{{ path('login') }}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
-            {% else %}
-                <p class="navbar-text"><span class="glyphicon glyphicon-user"></span>
-                    {{ app.user.username }} ({{ app.user.email ? app.user.email : 'NO EMAIL PROVIDED' }})
-                </p>
-                <li><a href="{{logout_path(key = null)}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
-            {% endif %}
-        </ul>
+        <div class="collapse navbar-collapse" id="navbar_collapse">
+            <ul class="nav navbar-nav">
+                <!--<li class="active"><a href="#">Home</a></li>-->
+                <li><a href="{{ path('homepage') }}">Home</a></li>
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <li><a href="{{ path('browse') ~ '?path=/' ~ app.user.username }}">My Files</a></li>
+                {% endif %}
+                <li><a href="{{ path('browse') }}">Browse All</a></li>
+                <li><a href="{{ path('privacy') }}">Privacy</a></li>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">Admin
+                        <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{{ path('admin_review') }}">Review</a></li>
+                            <li><a href="{{ path('admin_users') }}">Users</a></li>
+                            <li><a href="{{ path('admin_settings') }}">Settings</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                {% if not is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <li>
+                        <p class="navbar-btn">
+                            <a class="btn btn-default" role="button" href="{{ path('login') }}">
+                            <span class="glyphicon glyphicon-log-in"></span> Login
+                            </a>
+                        </p>
+                    </li>
+                {% else %}
+                    <li>
+                        <p class="navbar-text"><span class="glyphicon glyphicon-user"></span>
+                        {{ app.user.username }} ({{ app.user.email ? app.user.email : 'NO EMAIL PROVIDED' }})
+                        </p>
+                    </li>
+                    <li>
+                        <a href="{{logout_path(key = null)}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 </nav>

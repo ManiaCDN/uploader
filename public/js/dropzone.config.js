@@ -15,9 +15,26 @@ Dropzone.options.uploadBrowse = {
     // Given in microseconds. Does not trigger an error on timeout...
     timeout: 86400000,
     
+    // Allows cancelling the upload
+    addRemoveLinks: true,
+    
+    // Center message in the dropzone
+    dictDefaultMessage: "<strong>Drop File here<br /><u>Choose File</u></strong>",
+    
+    dictCancelUpload: "Cancel Upload",
+    
+    // don't show it because it might be confusing while not being so useful
+    dictRemoveFile: "",
+    
     params: {
         // pass the GET path variable to the serverside upload function,
         // so it knows where to store the file.
         path: getParameterByName('path'),
+    },
+    
+    init: function() {
+        this.on("success", function(file) {
+            document.getElementById('upload_success_alert').style.display = 'block';
+        });
     }
 };

@@ -33,7 +33,7 @@
 
                     <!-- size -->
                     <td>
-                        {{ bytes.humanReadableBytes(item.getSize) }}
+                        {{ not item.isDir ? bytes.humanReadableBytes(item.getSize) }}
                     </td>
 
                     <!-- block -->
@@ -54,19 +54,41 @@
                     <!-- download -->
                     <td>
                         {% if item.isFile %}
-                            <a style="display:block; width:100%;" 
-                                href="{{ path.getPublicURL }}"
-                            >Link</a>
+                            {% if filepath in blocklist %}
+                                <a class="btn btn-xs disabled" role="button" style="pointer-events: auto;"
+                                    title="Usually takes <24h" data-toggle="tooltip" data-placement="auto left"
+                                    href="{{ path.append(item.filename).getPublicURL }}"
+                                ><i class="glyphicon glyphicon-time"></i> Awaiting approval</a>
+                            {% else %}
+                                <a class="btn btn-info btn-xs" role="button" style="width:100%;"
+                                    href="{{ path.append(item.filename).getPublicURL }}"
+                                ><span class="glyphicon glyphicon-link"></span> Link</a>
+                            {% endif %}
                         {% endif %}
                     </td>
                 </tr>
             {% else %}
                 <div class="alert alert-info">
-                    No items in this folder.
+                    There is nothing here yet.
                 </div>
             {% endfor %}
-        </table>
-        <button type="submit" name="block-delete" class="btn btn-primary">Delete selected</button>
-        {{ is_granted('ROLE_ADMIN') ? 'Admin: This button will also update approval.' : '' }}
-    </tbody>
+        </tbody>
+    </table>
+        
+    {% if path.isWritableBy(app.user) %}
+        <div class="well well-sm text-right">
+            <button type="submit" name="block-delete" class="btn btn-primary">
+                {{ is_granted('ROLE_ADMIN') ? '<i class="glyphicon glyphicon-ok"></i> Update approval / delete' : '<span class="glyphicon glyphicon-trash"></span> Delete selected' }}
+            </button>
+        </div>
+    {% endif %}
 </form>
+
+{% block javascripts %}
+    <!-- enable bootstrap toolstips -->
+    <script>
+        $(document).ready(function(){
+          $('[data-toggle="tooltip"]').tooltip();   
+        });
+    </script>
+{% endblock %}

@@ -21,6 +21,8 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
+use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Ckr\Util\ArrayMerger;
 
 class BrowseController extends AbstractController implements ServiceSubscriberInterface
@@ -54,14 +56,15 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
     public function show(BlockedFilesManager $bfm,
             AuthorizationCheckerInterface $authChecker,
             FilesystemManager $fsm,
-            Mailer $mailer
-            
+            Mailer $mailer,
+            Session $session
     ) {
         $this->bfm = $bfm;
         $this->authChecker = $authChecker;
         $this->fsm = $fsm;
         $this->mailer = $mailer;
         $this->request = Request::createFromGlobals();
+        $this->session = $session;
         
         // parse the path into a Path object. Check for being in the base path included
         // trim / as they don't have any importance but would cause some special
@@ -79,7 +82,15 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
         // create user folder in case it isn't created yet
         $this->fsm->createUserFolder();
         
-        $list = $this->makeList($this->path);
+        try {
+            $list = $this->makeList($this->path);
+        }
+        catch (DirectoryNotFoundException $e) {
+            // not found: show empty folder with an alert
+            $session->getFlashBag()->add('danger', 'The folder "'.$this->path->getString().'" does not exist. It was probably deleted. You are now seeing the overview.');
+            $this->path->fromString(''); // reset path to root folder
+            $list = $this->makeList($this->path);
+        }
         
         return $this->render('browse/index.html.twig', [
             'path'              => $this->path,

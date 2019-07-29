@@ -4,7 +4,7 @@ This repository is part of the ManiaCDN project, a free CDN for and by the Mania
 ## Technology used
 
  - PHP 7.2
- - Symfony 4.1
+ - Symfony 4.3
  - Bootstrap 3 + Glyphicons
  - Dropzone.js uploader
  - Symfony bundles:

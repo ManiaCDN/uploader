@@ -1,11 +1,10 @@
-{% if path.isWritableBy(app.user) %}
-    <form method="post" action="{{ app.request.uri }}" class="form-inline">
+<form method="post" action="{{ app.request.uri }}" class="form-inline">
+    <div style="margin-bottom: 0px">
         <div class="form-group">
             <input type="hidden" name="token" value="{{ csrf_token('browse_newfolder') }}" />
             <label for="newdir">Create Folder: </label>
-            <input name="newdir" type="text" class="form-control">
+            <input name="newdir" id="newdir" type="text" class="form-control input-sm">
         </div>
-        <button type="submit" class="btn btn-default">Create</button>
-    </form>
-    <br>
-{% endif %}
+        <button type="submit" class="btn btn-default btn-sm">Create</button>
+    </div>
+</form>

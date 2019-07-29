@@ -1,16 +1,20 @@
-{% if path.isWritableBy(app.user) %}
-    {% block stylesheets %}
-    <link href="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/css/dropzone.css') }}" rel="stylesheet" />
-    <link href="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/css/dropzone_basic.css') }}" rel="stylesheet" />
-    {% endblock %}
+{% block stylesheets %}
+<link href="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/css/dropzone.css') }}" rel="stylesheet" />
+<link href="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/css/dropzone_basic.css') }}" rel="stylesheet" />
+{% endblock %}
 
-    {% block body %}
-        <form action="{{ oneup_uploader_endpoint('browse') }}" class="dropzone" id="upload-browse"></form>
-        <br>
-    {% endblock %}
+{% block body %}
+    <form action="{{ oneup_uploader_endpoint('browse') }}" class="dropzone" id="upload-browse"></form>
 
-    {% block javascripts %}
-    <script type="text/javascript" src="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/js/dropzone.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('js/dropzone.config.js') }}"></script>
-    {% endblock %}
-{% endif %}
+    <!-- This message is shown when a file gets successfully uploaded. It's triggered by
+    an event in dropzone.config.js. -->
+    <div class="alert alert-success alert-dismissible fade in" style="display: none" id="upload_success_alert">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        File(s) successfully uploaded. Please <a class="alert-link" href="{{ app.request.uri }}">refresh</a> the page to see it in the list.
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="{{ asset('http://maniacdn.net/askuri/ManiaCDN/uploader_assets/js/dropzone.js') }}"></script>
+<script src="{{ asset('js/dropzone.config.js') }}"></script>
+{% endblock %}

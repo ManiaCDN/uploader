@@ -125,7 +125,7 @@ class FilesystemManager
         if ($path->isWritableBy($this->user)
             && !$this->filesystem->exists($dirToCreate)) {
             $this->filesystem->mkdir($dirToCreate);
-            $this->session->getFlashBag()->add('success', 'Directory successfully created.');
+            $this->session->getFlashBag()->add('success', 'Folder successfully created.');
             return true;
         } else {
             $this->session->getFlashBag()->add('danger', 'Could not create the folder. Do you have permission? Does the folder or file already exist?');
