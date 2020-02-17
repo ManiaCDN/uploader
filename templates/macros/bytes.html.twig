@@ -1,5 +1,4 @@
 {% macro humanReadableBytes(bytes) %}
-{% spaceless %}
     {% set kilobyte = 1000 %}
     {% set megabyte = kilobyte * 1000 %}
     {% set gigabyte = megabyte * 1000 %}
@@ -19,5 +18,4 @@
     {% else %}
         {{ (bytes / petabyte)|number_format(2, '.') ~ ' PB' }}
     {% endif %}
-{% endspaceless %}
 {% endmacro %}

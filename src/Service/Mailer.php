@@ -23,7 +23,7 @@ class Mailer
     
     public function __construct(\Swift_Mailer $mailer,
             ManiaplanetUserRepository $userRepository,
-            \Twig_Environment $twig,
+            \Twig\Environment $twig,
             SessionInterface $session,
             $adminEmail
     ) {

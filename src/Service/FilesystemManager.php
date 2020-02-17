@@ -31,7 +31,7 @@ class FilesystemManager
     public function __construct(BlockedFilesManager $bfm,
             TokenStorageInterface $tokenStorage,
             SessionInterface $session,
-            \Twig_Environment $twig
+            \Twig\Environment $twig
     ) {
         $this->bfm = $bfm;
         $this->user = $tokenStorage->getToken()->getUser();

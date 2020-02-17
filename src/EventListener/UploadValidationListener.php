@@ -10,7 +10,7 @@ namespace App\EventListener;
 use App\Service\Path;
 use Oneup\UploaderBundle\Event\ValidationEvent;
 use Oneup\UploaderBundle\Uploader\Exception\ValidationException;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
@@ -22,7 +22,7 @@ class UploadValidationListener
     private $authChecker;
     
     public function __construct(
-            TokenStorage $tokenStorage,
+            UsageTrackingTokenStorage $tokenStorage,
             Path $path,
             AuthorizationCheckerInterface $authChecker
     ) {
