@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User settings{% endblock %}
+
+{% block body %}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <p>Your email: {{ app.user.email ? app.user.email : 'No email provided. We won\' be able to send you emails.' }}</p>
+        <p>
+            We got this email from your maniaplanet account. If you want to change it, please change it in
+            your maniaplanet account. After, log out and log in again here. Currently it is not possible
+            to use an email other than your maniaplanet email
+        </p>
+        
+        <h3>Your subscription settings</h3>
+        <form action="{{ path('user_set_notification_settings') }}" method="GET">
+            <input type="hidden" name="email" value="{{ app.user.email }}">
+
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" name="email_send_approval_notification" {{ app.user.getEmailSendApprovalNotification ? 'checked' : '' }}> 
+                    Receive emails when content I uploaded gets approved or deleted.
+                </label>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-default">
+            </div>
+        </form>
+    {% else %}
+        <p>You're not logged in</p>
+    {% endif %}
+{% endblock %}

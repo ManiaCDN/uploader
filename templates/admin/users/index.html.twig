@@ -9,6 +9,7 @@
             <th>Login</th>
             <th>Nickname</th>
             <th>Email</th>
+            <th>Email consent</th>
         </tr>
     </thead>
     <tbody>
@@ -28,6 +29,12 @@
                 <td>
                     <a href="mailto:{{ item.email|e }}">{{ item.email|e }}</a>
                 </td>
+                
+                <!-- email consent -->
+                <td>
+                   {{ item.getEmailSendApprovalNotification() == 1 ? 'Yes' : 'No' }}
+                </td>
+                
             </tr>
         {% else %}
             <div class="alert alert-info">

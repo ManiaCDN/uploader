@@ -61,6 +61,12 @@ class Mailer
                 continue;
             }
             
+            // check whether this user gave permission to send emails
+            if ($user->getEmailSendApprovalNotification() == 0) {
+                $this->session->getFlashBag()->add('warning', 'User ' . $owner . ' did not give permission to send email notifications.');
+                continue;
+            }
+            
             $body = $this->twig->render(
                 'emails/review_notification.txt.twig',
                 [

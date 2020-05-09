@@ -52,6 +52,11 @@ class ManiaplanetUser implements UserInterface, \Serializable
      * @ORM\Column(type="string", length=191)
      */
     private $role;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $email_send_approval_notification;
     
     public function getUsername()
     {
@@ -177,5 +182,17 @@ class ManiaplanetUser implements UserInterface, \Serializable
             $this->nickname,
             $this->email,
         ) = unserialize($serialized, ['allowed_classes' => false]);
+    }
+
+    public function getEmailSendApprovalNotification(): ?bool
+    {
+        return $this->email_send_approval_notification;
+    }
+
+    public function setEmailSendApprovalNotification(bool $email_send_approval_notification): self
+    {
+        $this->email_send_approval_notification = $email_send_approval_notification;
+
+        return $this;
     }
 }

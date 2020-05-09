@@ -26,6 +26,14 @@ browse:
     path: /browse
     controller: App\Controller\BrowseController::show
 
+user:
+    path: /user
+    controller: App\Controller\UserController::show
+
+user_set_notification_settings:
+    path: /user/set_notification_settings
+    controller: App\Controller\UserController::setNotificationSettings
+
 login:
     path: /login
     controller: App\Security\OAuth2\ManiaplanetAuthenticator::start

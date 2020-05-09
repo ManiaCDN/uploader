@@ -42,8 +42,11 @@
                 {% else %}
                     <li>
                         <p class="navbar-text"><span class="glyphicon glyphicon-user"></span>
-                        {{ app.user.username }} ({{ app.user.email ? app.user.email : 'NO EMAIL PROVIDED' }})
+                        {{ app.user.username }} {{ app.user.email ? '' : '(NO EMAIL PROVIDED)' }}
                         </p>
+                    </li>
+                    <li>
+                        <a href="{{ path('user') }}"><span class="glyphicon glyphicon-cog"></span> Settings</a>
                     </li>
                     <li>
                         <a href="{{logout_path(key = null)}}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
