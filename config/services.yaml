@@ -2,7 +2,6 @@
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     locale: 'en'
-    app.admin_email: 'info@maniacdn.net'
 
 services:
     # default configuration for services in *this* file
@@ -55,10 +54,6 @@ services:
     app.upload_namer:
         class: App\Uploader\UploadNamer
         public: true
-    
-    App\Service\Mailer:
-        arguments:
-            $adminEmail: '%app.admin_email%'
     
     App\Service\Path:
         class: App\Service\Path

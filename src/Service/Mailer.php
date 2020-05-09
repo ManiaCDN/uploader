@@ -24,14 +24,14 @@ class Mailer
     public function __construct(\Swift_Mailer $mailer,
             ManiaplanetUserRepository $userRepository,
             \Twig\Environment $twig,
-            SessionInterface $session,
-            $adminEmail
+            SessionInterface $session
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->twig = $twig;
         $this->session = $session;
-        $this->adminEmail = $adminEmail;
+        $this->from = 'maniacdn-approval@askuri.de';
+        $this->replyTo = 'info@maniacdn.net';
     }
     
     /**
@@ -68,17 +68,19 @@ class Mailer
             }
             
             $body = $this->twig->render(
-                'emails/review_notification.txt.twig',
+                'emails/review_notification.html.twig',
                 [
                     'files' => $files,
                     'recipient' => $user->getUsername(),
+                    'email' => $user->getEmail()
                 ]
             );
             
             $message = (new \Swift_Message('ManiaCDN admin reviewed your files'))
-                ->setFrom($this->adminEmail)
+                ->setFrom($this->from)
+                ->setReplyTo($this->replyTo)
                 ->setTo($user->getEmail())
-                ->setBody($body, 'text/plain')
+                ->setBody($body, 'text/html')
             ;
             
             $this->mailer->send($message);

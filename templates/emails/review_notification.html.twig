@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        <h5>Hello {{ recipient }}!</h5>
+
+        <p>We have taken time to approve your recent upload.
+        Usually the time from upload until review is less than 24 hours,
+        though we might take a bit longer sometimes.</p>
+        
+        <p>Below you find a list of the files we have approved. If one of them
+        is not approved, it has likely violated the upload terms.
+        In this case, read our terms again please. You can find them
+        on the uploader home page. If you are still not sure what is
+        wrong, please reply to this email.</p>
+
+        <p>IMPORTANT! It can take up to 6 hours until the files listed below are
+        available worldwide. Download links might not work yet.</p>
+
+        <p>The ManiaCDN team</p>
+
+
+        <p>Changes were made to the following files:</p>
+        <ul>
+        {% for file,change in files %}
+            <li>'{{ file }}' got {{ change }}</li>
+        {% endfor %}
+        </ul>
+        
+        <p>If you do not want to receive this kind of notification anymore, you can
+            <a href="http://upload.maniacdn.net{{ path('user_set_notification_settings') }}?email={{ email }}&email_send_approval_notification=0&redirect=homepage">click here to unsubscribe</a>.
+        </p>
+    </body>
+</html>
