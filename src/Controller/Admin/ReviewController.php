@@ -67,7 +67,13 @@ class ReviewController extends AbstractController implements ServiceSubscriberIn
         // (un-)blocks files, deletes also
         $this->blockDeleteAction();
         
-        $list = $this->bfm->read(false);
+        $list_raw = $this->bfm->read(false);
+        $list = [];
+        foreach ($list_raw as $path_raw) {
+            $tmp = $this->get('path'); // retrieve new instance
+            $tmp->fromString($path_raw);
+            $list[] = $tmp;
+        }
         return $this->render('admin/review/index.html.twig', [
             'list' => $list,
         ]);

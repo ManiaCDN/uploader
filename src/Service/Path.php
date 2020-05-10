@@ -83,13 +83,20 @@ class Path {
     
     /**
      * Get the i'th atom of the path.
+     * You may use negative numbers for a wrap around.
+     * E.g -1 gives the last element, -2 the second last.
      * 
      * @param int $i
      * @return string|null
      */
     public function getAtom(int $i): ?string {
-        if (isset($this->path[$i])) {
+        // positive $i
+        if ($i >= 0 && isset($this->path[$i])) {
             return $this->path[$i];
+        }
+        // negative: wrap around
+        elseif ($i < 0 && isset($this->path[count($this->path)+$i])) {
+            return $this->path[count($this->path)+$i];
         }
         else {
             return null;
@@ -249,5 +256,24 @@ class Path {
         else {
             return preg_replace('/[^A-Za-z0-9-._]/', '_', $path);
         }
+    }
+    
+    /**
+     * Returns true if the path points to a directory
+     * 
+     * @return bool
+     */
+    public function isDir(): bool {
+        return is_dir($this->getAbsolutePath());
+    }
+    
+    /**
+     * If the path points to a file, return its size.
+     * If it's not a file or does not exist, return false.
+     * 
+     * @return int, false on error
+     */
+    public function getFileSize() {
+        return filesize($this->getAbsolutePath());
     }
 }

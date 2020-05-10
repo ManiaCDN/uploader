@@ -1,3 +1,5 @@
+{% import "macros/bytes.html.twig" as bytes %}
+
 {% extends 'base.html.twig' %}
 
 {% block title %}ManiaCDN Admin{% endblock %}
@@ -9,6 +11,7 @@
         <thead>
             <tr>
                 <th>Name</th>
+                <th>Size</th>
                 <th>Approved</th>
                 <th>Delete</th>
                 <th>Download</th>
@@ -16,17 +19,22 @@
         </thead>
         <tbody>
             {% for item in list %}
-                {% set filepath = item|trim('/') %}
+                {% set filepath = item.getString %}
                 <tr>
                     <!-- name -->
                     <td>
-                        <span class="glyphicon glyphicon-file"></span> {{ item|e }}
+                        <span class="glyphicon glyphicon-file"></span> {{ item.getAtom(-1)|e }}
+                    </td>
+                    
+                    <!-- size -->
+                    <td>
+                        {{ not item.isDir ? bytes.humanReadableBytes(item.getFileSize) }}
                     </td>
 
                     <!-- block -->
                     <td>
-                        <input type="radio" checked name="block[{{ filepath }}]" value="true"> no
-                        <input type="radio" name="block[{{ filepath }}]" value="false"> yes
+                        <label><input type="radio" checked name="block[{{ filepath }}]" value="true"> no</label>
+                        <label><input type="radio" name="block[{{ filepath }}]" value="false"> yes</label>
                     </td>
 
                     <!-- delete -->
@@ -37,7 +45,7 @@
                     <!-- download -->
                     <td>
                         <a style="display:block; width:100%;" 
-                            href="{{ path('admin_review_download') }}?file={{ item }}"
+                            href="{{ path('admin_review_download') }}?file={{ item.getString }}"
                         >Link</a>
                     </td>
                 </tr>
