@@ -33,13 +33,13 @@
 
                     <!-- block -->
                     <td>
-                        <label><input type="radio" checked name="block[{{ filepath }}]" value="true"> no</label>
-                        <label><input type="radio" name="block[{{ filepath }}]" value="false"> yes</label>
+                        <label><input type="radio" checked name="block[{{ filepath }}]" value="true" class="approve-yes-marker-noncss"> no</label>
+                        <label><input type="radio" name="block[{{ filepath }}]" value="false" class="approve-no-marker-noncss"> yes</label>
                     </td>
 
                     <!-- delete -->
                     <td>
-                        <input type="checkbox" name="delete[{{ filepath }}]" value="true">
+                        <input type="checkbox" class="delete-marker-noncss" name="delete[{{ filepath }}]" value="true">
                     </td>
 
                     <!-- download -->
@@ -54,9 +54,39 @@
                     No items in this folder.
                 </div>
             {% endfor %}
-        </table>
+        </tbody>
+       
         <button type="submit" name="block-delete" class="btn btn-primary">Update Block & Delete</button>
-    </tbody>
+    </table>
+        
+    <a onclick="approveAll(false);" href="#" class="btn btn-default">Approve none</a>
+    <a onclick="approveAll(true);" href="#" class="btn btn-default">Approve all</a>
+    <br>
+    <label><input type="checkbox" onclick="toggleDelete(this);" /> Toggle delete all<br/></label>
 </form>
+        
+
+<script>
+function approveAll(approve) {
+    let radios = [];
+    if (approve == true) {
+        radios = document.getElementsByClassName('approve-no-marker-noncss');
+    } else {
+        radios = document.getElementsByClassName('approve-yes-marker-noncss');
+    }
+
+    for (let i = 0; i < radios.length; i++) {
+        radios[i].checked = true;
+    }
+}
+
+function toggleDelete(source) {
+    let checkboxes = document.getElementsByClassName('delete-marker-noncss');
+
+    for (let i=0; i<checkboxes.length; i++) {
+        checkboxes[i].checked = source.checked;
+    }
+}
+</script>
 
 {% endblock %}
