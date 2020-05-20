@@ -57,6 +57,7 @@ class Path {
      * Attention: starting '/' causes an empty first atom and
      * owner checks will fail and much more.
      * This should only be used once on one object!
+     * It is usually expected, that this is relative to PUBLIC_UPLOAD_URL 
      * 
      * @param string $s
      * @throws \Exception
@@ -169,18 +170,18 @@ class Path {
     
     /**
      * Returns a cloned object with a single atom appended to the path.
-     * No slashes allowed!
      * 
      * @param string $with
+     * @param bool $acceptslashes true if slashes should not be stripped (default false)
      * @return Path a clone of $this
      * @throws \Exception
      */
-    public function append(string $with): self {
-        if (strpos($with, '/')) {
+    public function append(string $with, bool $acceptslashes = false): self {
+        if (!$acceptslashes && strpos($with, '/')) {
             throw new \Exception('Paths may only be appended with atoms. No slashes allowed.');
         }
         
-        $with = self::cleanPath($with, false);
+        $with = self::cleanPath($with, $acceptslashes);
         
         $clone = clone $this;
         $clone->path[] = $with;

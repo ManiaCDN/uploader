@@ -7,6 +7,7 @@
         "aptoma/twig-markdown": "^3.0",
         "ckr/arraymerger": "dev-master",
         "knpuniversity/oauth2-client-bundle": "^1.19",
+        "maennchen/zipstream-php": "^2.0",
         "michelf/php-markdown": "~1.3",
         "oneup/uploader-bundle": "^2.0",
         "sensio/framework-extra-bundle": "^5.1",

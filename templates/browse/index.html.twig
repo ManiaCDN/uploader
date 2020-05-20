@@ -20,6 +20,8 @@
     <br />
 {% endif %}
 
+{% include 'browse/components/locs_download.html.twig' %}
+
 <!-- create new folder -->
 {% if path.isWritableBy(app.user) %}
     {% include 'browse/components/newfolder.html.twig' %}

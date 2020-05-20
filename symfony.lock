@@ -95,11 +95,17 @@
     "league/oauth2-client": {
         "version": "2.3.0"
     },
+    "maennchen/zipstream-php": {
+        "version": "2.0.0"
+    },
     "michelf/php-markdown": {
         "version": "1.8.0"
     },
     "monolog/monolog": {
         "version": "1.23.0"
+    },
+    "myclabs/php-enum": {
+        "version": "1.7.6"
     },
     "nette/bootstrap": {
         "version": "v3.0.0"

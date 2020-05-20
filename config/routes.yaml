@@ -26,6 +26,10 @@ browse:
     path: /browse
     controller: App\Controller\BrowseController::show
 
+browser_locs_download:
+    path: /browse/locs_download
+    controller: App\Controller\BrowseController::downloadLocsAction 
+
 user:
     path: /user
     controller: App\Controller\UserController::show

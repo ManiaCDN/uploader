@@ -23,7 +23,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Ckr\Util\ArrayMerger;
+use ZipStream;
+use ZipStream\Option\Archive;
 
 class BrowseController extends AbstractController implements ServiceSubscriberInterface
 {
@@ -36,7 +39,7 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
     
     public function __construct()
     {
-        
+        $this->request = Request::createFromGlobals();
     }
     
     /**
@@ -63,7 +66,6 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
         $this->authChecker = $authChecker;
         $this->fsm = $fsm;
         $this->mailer = $mailer;
-        $this->request = Request::createFromGlobals();
         $this->session = $session;
         
         // parse the path into a Path object. Check for being in the base path included
@@ -71,7 +73,6 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
         // handling if they were taken to the path
         $this->path = $this->get('path');
         $this->path->fromString($this->request->query->get('path', '.'));
-        
         
         // (un-)blocks files, deletes files
         $this->blockDeleteAction();
@@ -97,6 +98,49 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
             'list'              => $list,
             'blocklist'         => $this->bfm->read(false),
         ]);
+    }
+    
+    /**
+     * Create a zip archive of .loc files used by Maniaplanet and Trackmania.
+     * Requires GET parameter 'path' that gives the root of the zip that
+     * should be created, relative to UPLOAD_DIR.
+     * 
+     * @return StreamedResponse
+     */
+    public function downloadLocsAction() {
+        $this->path = $this->get('path');
+        $this->path->fromString($this->request->query->get('path', '.'));
+        
+        // get a list of files we need to create .loc files for
+        $finder = new Finder();
+        $list = $finder
+                ->files() // look for files only, exclude directories
+                ->in($this->path->getAbsolutePath());
+        
+        $response = new StreamedResponse(function() use ($list) {
+            $options = new Archive();
+            
+            $options->setContentType('application/octet-stream');
+            $options->setZeroHeader(true); // this is needed to prevent issues with truncated zip files
+            $options->setSendHttpHeaders(true); // let zipstream set the headers
+            $options->setEnableZip64(false); // according to zipstream readme, zip64 can cause issues on MacOS and we don't need it
+            
+            $zip = new ZipStream\ZipStream('locators.zip', $options);
+            
+            foreach ($list as $file) {
+                // to the path from the url (indicating the root of th archive)
+                // we add the relative paths from there to each file that's 
+                // going into the archive
+                $filepath = $this->path->append($file->getRelativePathname(), true);
+                
+                // for each file we find, we create a new .loc file with the same name.
+                // the content is the file's public URL
+                $zip->addFile($filepath->getString().'.loc', $filepath->getPublicURL());
+            }
+                
+            $zip->finish();
+        });
+        return $response;
     }
     
     /**
