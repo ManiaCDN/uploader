@@ -17,6 +17,12 @@
 
     &nbsp; #}
     
+    <a href="{{ path('browser_locs_download') }}?path={{ path.getString }}"
+        style="margin-bottom: 0px"
+        class="btn btn-default">
+        <span class="glyphicon glyphicon-download-alt"></span> .loc files
+    </a>
+    
     <ul class="breadcrumb" style="margin-bottom: 0px">
         {% set depth = path.getDepth %}
         <li><a href="{{ app.request.pathinfo ~ '?path=/' }}"><span class="glyphicon glyphicon-home"></span></a></li>
