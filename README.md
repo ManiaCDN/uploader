@@ -1,10 +1,10 @@
 ## About this
-This repository is part of the ManiaCDN project, a free CDN for and by the Maniaplanet community. It's the central website to upload and browse data on the network. You can use it on http://upload.manicdn.net/
+This repository is part of the ManiaCDN project, a free CDN for and by the Maniaplanet community. It's the central website to upload and browse data on the network. You can use it on http://upload.maniacdn.net/. Please note that a Maniaplanet account is required to use it.
 
-## Technology used
+## Technologies used
 
- - PHP 7.2
- - Symfony 4.3
+ - PHP 7
+ - Symfony
  - Bootstrap 3 + Glyphicons
  - Dropzone.js uploader
  - Symfony bundles:
@@ -38,6 +38,5 @@ That's it already. Now you're ready to start the development server of Symfony:
 	
 Keep the terminal / commandline open. You'll find the sample on http://localhost:8000/
 
-## Going on
 For people familiar with Symfony, things should go pretty straightforward. I have tried to comply with Symfony Best Practices as much as possible, so you should find all files where you'd expect them.
 You might also delete the pre-existing Migrations in src/Migrations, if doctrine throws strange errors while executing the migration.
