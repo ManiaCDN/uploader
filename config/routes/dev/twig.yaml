@@ -1,3 +1,4 @@
-_errors:
-    resource: '@TwigBundle/Resources/config/routing/errors.xml'
-    prefix: /_error
+# somehow this causes errors, don't know what i need it for either.
+#_errors:
+#    resource: '@TwigBundle/Resources/config/routing/errors.xml'
+#    prefix: /_error

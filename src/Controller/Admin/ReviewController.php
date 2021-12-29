@@ -14,14 +14,14 @@ use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use App\Service\Mailer;
 use App\Service\Path;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Ckr\Util\ArrayMerger;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
-use Ckr\Util\ArrayMerger;
 
 class ReviewController extends AbstractController implements ServiceSubscriberInterface
 {
@@ -86,7 +86,7 @@ class ReviewController extends AbstractController implements ServiceSubscriberIn
         }
         
         $file = $this->request->query->get('file');
-        $pathname = getenv('UPLOAD_DIR').'/'.$file;
+        $pathname = $_ENV['UPLOAD_DIR'].'/'.$file;
         
         $spl = new \SplFileInfo($pathname); // why doesn't spl provide MIME types?
         $finfo = new \finfo(FILEINFO_MIME);

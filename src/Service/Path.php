@@ -9,8 +9,8 @@
 
 namespace App\Service;
 
-use Webmozart\PathUtil\Path as PU;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Webmozart\PathUtil\Path as PU;
 
 class Path {
     /**
@@ -137,7 +137,7 @@ class Path {
      * @return string
      */
     public function getPublicURL(): string {
-        return PU::join(getenv('PUBLIC_UPLOAD_URL'), $this->getString());
+        return PU::join($_ENV['PUBLIC_UPLOAD_URL'], $this->getString());
     }
     
     /**
@@ -147,7 +147,7 @@ class Path {
      * @return string
      */
     public function getAbsolutePath(): string {
-        return PU::join(getenv('UPLOAD_DIR'), $this->getString());
+        return PU::join($_ENV['UPLOAD_DIR'], $this->getString());
     }
     
     /**

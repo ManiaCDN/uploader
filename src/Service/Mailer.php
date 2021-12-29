@@ -11,25 +11,24 @@
 namespace App\Service;
 
 use App\Repository\ManiaplanetUserRepository;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class Mailer
 {
     private $mailer;
     private $userRepository;
     private $twig;
-    private $adminEmail;
-    private $session;
+    private $requestStack;
     
     public function __construct(\Swift_Mailer $mailer,
             ManiaplanetUserRepository $userRepository,
             \Twig\Environment $twig,
-            SessionInterface $session
+            RequestStack $requestStack
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->twig = $twig;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
         $this->from = 'maniacdn-approval@askuri.de';
         $this->replyTo = 'info@maniacdn.net';
     }
@@ -48,7 +47,7 @@ class Mailer
             $user = $this->userRepository->findOneBy(['login' => $owner]);
             
             if (!$user) {
-                $this->session->getFlashBag()->add('danger', 'Couldn\'t find a database entry for login "'.$owner.'"! Something is significantly wrong here! Changes were made though, email was just not sent.');
+                $this->requestStack->getSession()->getFlashBag()->add('danger', 'Couldn\'t find a database entry for login "'.$owner.'"! Something is significantly wrong here! Changes were made though, email was just not sent.');
                 continue;
             }
             
@@ -57,13 +56,13 @@ class Mailer
             
             if (!$email) {
                 // it seems some users don't allow access their email address
-                $this->session->getFlashBag()->add('warning', 'User '.$owner.' did not provide a valid email address. Thus the notification was not send.');
+                $this->requestStack->getSession()->getFlashBag()->add('warning', 'User '.$owner.' did not provide a valid email address. Thus the notification was not send.');
                 continue;
             }
             
             // check whether this user gave permission to send emails
             if ($user->getEmailSendApprovalNotification() == 0) {
-                $this->session->getFlashBag()->add('warning', 'User ' . $owner . ' did not give permission to send email notifications.');
+                $this->requestStack->getSession()->getFlashBag()->add('warning', 'User ' . $owner . ' did not give permission to send email notifications.');
                 continue;
             }
             
@@ -85,7 +84,7 @@ class Mailer
             
             $this->mailer->send($message);
             
-            $this->session->getFlashBag()->add('success', 'User notification was successfully sent to '.$owner.'.');
+            $this->requestStack->getSession()->getFlashBag()->add('success', 'User notification was successfully sent to '.$owner.'.');
         }
     }
 }

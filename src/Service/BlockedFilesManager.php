@@ -14,22 +14,8 @@
 
 namespace App\Service;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-
 class BlockedFilesManager
 {
-    private $session;
-    
-    private $blocked_files_list;
-    
-    public function __construct(
-            SessionInterface $session
-    ) {
-        $this->session = $session;
-        
-        $this->blocked_files_list = getenv('BLOCKED_FILES_LIST');
-    }
-    
     /**
      * Takes an array of App\Service\Path's to be blocked or unblocked.
      * There are attributes of Path indicating whether
@@ -86,7 +72,7 @@ class BlockedFilesManager
      */
     public function read(bool $flip = true): array {
         // parse file into array similar to [n] => file.name
-        $file = file($this->blocked_files_list, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $file = file($_ENV['BLOCKED_FILES_LIST'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         
         if ($flip) {
             // invert keys and values to [file.name] => n
@@ -107,6 +93,6 @@ class BlockedFilesManager
         $filesBlockedString = implode("\n", array_flip($filesBlocked)); 
         
         // save
-        file_put_contents($this->blocked_files_list, $filesBlockedString);
+        file_put_contents($_ENV['BLOCKED_FILES_LIST'], $filesBlockedString);
     }
 }

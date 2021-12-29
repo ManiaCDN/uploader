@@ -2,23 +2,24 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class UserController extends AbstractController
 {
     private $request;
     private $em;
-    private $session;
+    private $requestStack;
     
-    public function __construct(EntityManagerInterface $entityManager, SessionInterface $session) {
-        $this->request = $this->request = Request::createFromGlobals();
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        RequestStack $requestStack
+    ) {
+        $this->request = Request::createFromGlobals();
         $this->em = $entityManager;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
     }
     
     public function show()
@@ -47,7 +48,7 @@ class UserController extends AbstractController
         // save changes in db
         $this->em->flush();
         
-        $this->session->getFlashBag()->
+        $this->requestStack->getSession()->getFlashBag()->
             add('success', 'Changes saved successfully.');
         
         if ($this->request->query->get('redirect', null) == 'homepage') {

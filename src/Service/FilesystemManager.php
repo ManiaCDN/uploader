@@ -11,33 +11,25 @@
 
 namespace App\Service;
 
-use App\Service\BlockedFilesManager;
-use App\Service\Path;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class FilesystemManager
 {
     private $bfm;
     private $user;
-    private $session;
-    private $request;
-    private $twig;
+    private $requestStack;
     
     private $filesystem;
     
     public function __construct(BlockedFilesManager $bfm,
             TokenStorageInterface $tokenStorage,
-            SessionInterface $session,
-            \Twig\Environment $twig
+            RequestStack $requestStack
     ) {
         $this->bfm = $bfm;
         $this->user = $tokenStorage->getToken()->getUser();
-        $this->session = $session;
-        $this->request = Request::createFromGlobals();
-        $this->twig = $twig;
+        $this->requestStack = $requestStack;
         
         $this->filesystem = new Filesystem();
     }
@@ -78,18 +70,18 @@ class FilesystemManager
             // check if any of the pathnames aren't allowed to be written.
             // only checks for user roles, not in the file system
             if (!$path->isWritableBy($this->user)) {
-                $this->session->getFlashBag()->add('danger', 'You\'re not allowed to delete this file: '.$pathname);
+                $this->requestStack->getSession()->getFlashBag()->add('danger', 'You\'re not allowed to delete this file: '.$pathname);
                 continue;
             }
             
             // check if file or directory exists and if it can be deleted
             if (!is_writable($fullPath)) {
-                $this->session->getFlashBag()->add('warning', '"'.$pathname.'" cannot be deleted because it either doesn\'t exist or writing permissions are missing.');
+                $this->requestStack->getSession()->getFlashBag()->add('warning', '"'.$pathname.'" cannot be deleted because it either doesn\'t exist or writing permissions are missing.');
                 continue;
             }
             
             if (is_dir($fullPath) && !$this->isDirEmpty($fullPath)) {
-                $this->session->getFlashBag()->add('warning', 'Only empty folders can be deleted. Please delete all files inside "'.$pathname.'" first.');
+                $this->requestStack->getSession()->getFlashBag()->add('warning', 'Only empty folders can be deleted. Please delete all files inside "'.$pathname.'" first.');
                 continue;
             }
             
@@ -106,7 +98,7 @@ class FilesystemManager
         // unblock now
         $this->bfm->block($unblocklist);
         
-        $this->session->getFlashBag()->add('success', count($unblocklist).' file(s) were deleted.');
+        $this->requestStack->getSession()->getFlashBag()->add('success', count($unblocklist).' file(s) were deleted.');
         
         return $changelog;
     }
@@ -125,10 +117,10 @@ class FilesystemManager
         if ($path->isWritableBy($this->user)
             && !$this->filesystem->exists($dirToCreate)) {
             $this->filesystem->mkdir($dirToCreate);
-            $this->session->getFlashBag()->add('success', 'Folder successfully created.');
+            $this->requestStack->getSession()->getFlashBag()->add('success', 'Folder successfully created.');
             return true;
         } else {
-            $this->session->getFlashBag()->add('danger', 'Could not create the folder. Do you have permission? Does the folder or file already exist?');
+            $this->requestStack->getSession()->getFlashBag()->add('danger', 'Could not create the folder. Do you have permission? Does the folder or file already exist?');
             return false;
         }
     }
@@ -137,7 +129,7 @@ class FilesystemManager
      * Creates the user's own folder named by his/her own login
      */
     public function createUserFolder() {
-        $this->filesystem->mkdir(getenv('UPLOAD_DIR').'/'.$this->user->getUsername());
+        $this->filesystem->mkdir($_ENV['UPLOAD_DIR'].'/'.$this->user->getUsername());
     }
     
     /**
