@@ -57,13 +57,6 @@ class ManiaplanetProvider extends AbstractProvider
      */
     protected function fetchResourceOwnerDetails(AccessToken $token)
     {
-        $urls = [
-            self::BASE_URL . 'webservices/me',
-            self::BASE_URL . 'webservices/me/email'
-        ];
-
-        $details = [];
-
         // get main details.
         $request = $this->getAuthenticatedRequest(self::METHOD_GET, self::BASE_URL . 'webservices/me', $token);
         $details = $this->getParsedResponse($request);

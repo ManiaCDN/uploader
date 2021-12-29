@@ -38,18 +38,14 @@ user_set_notification_settings:
     path: /user/set_notification_settings
     controller: App\Controller\UserController::setNotificationSettings
 
-login:
-    path: /login
-    controller: App\Security\OAuth2\ManiaplanetAuthenticator::start
-
-logout:
-    path: /logout
-    # no controller needed
-
 # login route should redirect the user here
 connect_maniaplanet:
     path: /connect/maniaplanet
     controller: App\Controller\ManiaplanetController::connectAction
+
+logout:
+    path: /logout
+    # no controller needed
 
 # shown after the login process finished
 connect_maniaplanet_finish:

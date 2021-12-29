@@ -1,21 +1,31 @@
 security:
+    enable_authenticator_manager: true
+
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
-        default_provider:
-            entity: { class: App\Entity\ManiaplanetUser }
+        app_user_provider:
+            entity:
+                class: App\Entity\ManiaplanetUser
 
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            anonymous: ~
+            lazy: true
+            provider: app_user_provider
+            custom_authenticators:
+                - App\Security\OAuth2\ManiaplanetAuthenticator
             logout:
-                path:   /logout
-                target: /
-            guard:
-                authenticators:
-                    - App\Security\OAuth2\ManiaplanetAuthenticator
+                path: logout
+            #anonymous: ~
+            #logout:
+            #    path:   /logout
+            #    target: /
+            #guard:
+            #    authenticators:
+            #        - App\Security\OAuth2\ManiaplanetAuthenticator
+
             # this should avoid problems of session timeout during upload
 #            remember_me:
 #                secret:   '%kernel.secret%' # used to encrypt the cookie
