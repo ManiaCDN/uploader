@@ -18,20 +18,7 @@ security:
                 - App\Security\OAuth2\ManiaplanetAuthenticator
             logout:
                 path: logout
-            #anonymous: ~
-            #logout:
-            #    path:   /logout
-            #    target: /
-            #guard:
-            #    authenticators:
-            #        - App\Security\OAuth2\ManiaplanetAuthenticator
-
-            # this should avoid problems of session timeout during upload
-#            remember_me:
-#                secret:   '%kernel.secret%' # used to encrypt the cookie
-#                lifetime: 86400 # 1 day in seconds
-#                path:     / # remember me applies everywhere
-#                always_remember_me: true # don't ask the user if he wants to be remembered
+            entry_point: App\Security\AuthenticationEntryPoint
 
     role_hierarchy:
         ROLE_ADMIN: ROLE_USER # ROLE_ADMIN inherits ROLE_USER

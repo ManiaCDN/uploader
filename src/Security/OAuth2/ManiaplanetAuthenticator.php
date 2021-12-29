@@ -48,6 +48,15 @@ class ManiaplanetAuthenticator extends OAuth2Authenticator
         $this->requestStack = $requestStack;
     }
 
+    /**
+     * Does the authenticator support the given Request?
+     *
+     * If this returns false, the authenticator will be skipped.
+     *
+     * @param Request $request
+     *
+     * @return bool
+     */
     public function supports(Request $request): ?bool
     {
         return $request->getPathInfo() == '/connect/maniaplanet/finish';
@@ -94,11 +103,39 @@ class ManiaplanetAuthenticator extends OAuth2Authenticator
         );
     }
 
+    /**
+     * Called when authentication executed and was successful!
+     *
+     * This should return the Response sent back to the user, like a
+     * RedirectResponse to the last page they visited.
+     *
+     * If you return null, the current request will continue, and the user
+     * will be authenticated. This makes sense, for example, with an API.
+     *
+     * @param Request $request
+     * @param TokenInterface $token
+     * @param string $firewallName
+     * @return Response|null
+     */
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         return null;
     }
 
+    /**
+     * Called when authentication executed, but failed (e.g. wrong username password).
+     *
+     * This should return the Response sent back to the user, like a
+     * RedirectResponse to the login page or a 403 response.
+     *
+     * If you return null, the request will continue, but the user will
+     * not be authenticated. This is probably not what you want to do.
+     *
+     * @param Request $request
+     * @param AuthenticationException $exception
+     *
+     * @return Response|null
+     */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         $this->requestStack->getSession()->getFlashBag()->add('error', 'Login has expired or failed!');
