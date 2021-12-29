@@ -11,6 +11,7 @@
 
 namespace App\Service;
 
+use App\Entity\Path;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;

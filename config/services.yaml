@@ -58,12 +58,6 @@ services:
         class: App\Uploader\UploadNamer
         public: true
     
-    App\Service\Path:
-        class: App\Service\Path
-        # create new instances instead of sharing one
-        # see https://symfony.com/doc/current/service_container/shared.html
-        shared: false
-    
     Aptoma\Twig\Extension\MarkdownEngineInterface:
         class: Aptoma\Twig\Extension\MarkdownEngine\MichelfMarkdownEngine 
 

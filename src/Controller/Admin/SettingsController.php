@@ -3,7 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Setting;
-use App\Repository\SettingRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -12,17 +12,16 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 class SettingsController extends AbstractController
 {
     private $request;
-    private $em;
-    private $userRepository;
+    private $managerRegistry;
     private $authChecker;
     
     public function __construct(
-            SettingRepository $settingRepository,
-            AuthorizationCheckerInterface $authChecker
+            AuthorizationCheckerInterface $authChecker,
+            ManagerRegistry $managerRegistry
     ) {
-        $this->userRepository = $settingRepository;
         $this->authChecker = $authChecker;
         $this->request = Request::createFromGlobals();
+        $this->managerRegistry = $managerRegistry;
     }
     
     public function show()
@@ -32,11 +31,10 @@ class SettingsController extends AbstractController
         }
         
         $this->request = Request::createFromGlobals();
-        $this->em = $this->getDoctrine()->getManager();
         
         $this->setWelcome();
         
-        $welcome_prev = $this->getDoctrine()
+        $welcome_prev = $this->managerRegistry
             ->getRepository(Setting::class)
             ->getWelcome();
         
@@ -61,17 +59,15 @@ class SettingsController extends AbstractController
         
         $this->csrfCheck();
         
-        $em = $this->getDoctrine()->getManager();
-        
         // get current setting so we know if it needs to be updated
-        $db_setting = $this->getDoctrine()
+        $db_setting = $this->managerRegistry
             ->getRepository(Setting::class)
             ->findOneBy(['name' => 'welcome_message']);
         
         if (null !== $db_setting) {
             // setting already exists, so let's update it
             $db_setting->setValue($value);
-            $em->flush();
+            $this->managerRegistry->getManager()->flush();
         }
         else {
             // setting doesn't exist yet
@@ -79,8 +75,8 @@ class SettingsController extends AbstractController
             $setting->setName('welcome_message');
             $setting->setValue($value);
 
-            $em->persist($setting);
-            $em->flush();
+            $this->managerRegistry->getManager()->persist($setting);
+            $this->managerRegistry->getManager()->flush();
         }
     }
 }

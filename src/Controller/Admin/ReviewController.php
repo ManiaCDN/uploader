@@ -10,10 +10,10 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\Path;
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use App\Service\Mailer;
-use App\Service\Path;
 use Ckr\Util\ArrayMerger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -21,9 +21,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
-use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
-class ReviewController extends AbstractController implements ServiceSubscriberInterface
+class ReviewController extends AbstractController
 {
     private $bfm;
     private $fsm;
@@ -44,20 +43,6 @@ class ReviewController extends AbstractController implements ServiceSubscriberIn
         $this->request = Request::createFromGlobals();
     }
     
-    /**
-     * Make the path service available through $this->get().
-     * See: https://symfony.com/doc/current/service_container/service_subscribers_locators.html#defining-a-service-subscriber
-     * It must inherit the services from the AbstractController.
-     * 
-     * @return array
-     */
-    public static function getSubscribedServices(): array
-    {
-        return array_merge(parent::getSubscribedServices(), [
-            'path' => Path::class,
-        ]);
-    }
-    
     public function show()
     {
         if (false === $this->authChecker->isGranted('ROLE_ADMIN')) {
@@ -70,7 +55,7 @@ class ReviewController extends AbstractController implements ServiceSubscriberIn
         $list_raw = $this->bfm->read(false);
         $list = [];
         foreach ($list_raw as $path_raw) {
-            $tmp = $this->get('path'); // retrieve new instance
+            $tmp = new Path();
             $tmp->fromString($path_raw);
             $list[] = $tmp;
         }
@@ -109,8 +94,8 @@ class ReviewController extends AbstractController implements ServiceSubscriberIn
      */
     private function blockDeleteAction()
     {
-        $blocks_raw = $this->request->request->get('block', array());
-        $delete_raw = $this->request->request->get('delete', array());
+        $blocks_raw = $this->request->request->all('block') ?? [];
+        $delete_raw = $this->request->request->all('delete') ?? [];
         $token  = $this->request->request->get('token');
         
         if (empty($blocks_raw)) {
@@ -126,7 +111,7 @@ class ReviewController extends AbstractController implements ServiceSubscriberIn
         // block:
         $blocks = [];
         foreach ($blocks_raw as $name => $status) {
-            $tmp = $this->get('path'); // retrieve new instance
+            $tmp = new Path();
             $tmp->fromString($name);
             $tmp->setBlocked(filter_var($status, FILTER_VALIDATE_BOOLEAN));
             $blocks[] = $tmp;
@@ -136,7 +121,7 @@ class ReviewController extends AbstractController implements ServiceSubscriberIn
         // delete
         $delete = [];
         foreach ($delete_raw as $name => $status) {
-            $tmp = $this->get('path'); // retrieve new instance
+            $tmp = new Path();
             $tmp->fromString($name);
             $tmp->setDelete(filter_var($status, FILTER_VALIDATE_BOOLEAN));
             $delete[] = $tmp;

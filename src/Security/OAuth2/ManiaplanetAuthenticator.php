@@ -18,8 +18,8 @@ use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\OAuth2Authenticator;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -34,18 +34,18 @@ class ManiaplanetAuthenticator extends OAuth2Authenticator
     private $clientRegistry;
     private $entityManager;
     private $router;
-    private $flashBag;
+    private $requestStack;
 
     public function __construct(
         ClientRegistry $clientRegistry,
         EntityManagerInterface $entityManager,
         RouterInterface $router,
-        FlashBagInterface $flashBag
+        RequestStack $requestStack
     ) {
         $this->clientRegistry = $clientRegistry;
         $this->entityManager = $entityManager;
         $this->router = $router;
-        $this->flashBag = $flashBag;
+        $this->requestStack = $requestStack;
     }
 
     public function supports(Request $request): ?bool
@@ -101,7 +101,7 @@ class ManiaplanetAuthenticator extends OAuth2Authenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        $this->flashBag->add('error', 'Login has expired or failed!');
+        $this->requestStack->getSession()->getFlashBag()->add('error', 'Login has expired or failed!');
         return new RedirectResponse($this->router->generate('homepage'));
     }
 }

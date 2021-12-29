@@ -1,19 +1,18 @@
 <?php
 namespace App\EventListener;
 
-use App\Service\Path;
+use App\Entity\Path;
 use App\Service\BlockedFilesManager;
 use Oneup\UploaderBundle\Event\PostPersistEvent;
+use Oneup\UploaderBundle\Uploader\Response\ResponseInterface;
 
 class UploadListener
 {
     private $bfm;
-    private $path;
 
-    public function __construct(BlockedFilesManager $bfm, Path $path)
+    public function __construct(BlockedFilesManager $bfm)
     {
         $this->bfm = $bfm;
-        $this->path = $path;
     }
     
     /**
@@ -22,19 +21,20 @@ class UploadListener
      * UploadValidationListener
      * 
      * @param PostPersistEvent $event
-     * @return array
+     * @return ResponseInterface
      */
     public function onUpload(PostPersistEvent $event)
     {
         $request = $event->getRequest();
         $file    = $event->getFile();
-        
-        $this->path->fromString($request->get('path'));
-        $this->path = $this->path->append($file->getBasename());
-        $this->path->setBlocked(true);
+
+        $path = new Path();
+        $path->fromString($request->get('path'));
+        $path = $path->append($file->getBasename());
+        $path->setBlocked(true);
         
         // block the file from public access
-        $this->bfm->block([$this->path]);
+        $this->bfm->block([$path]);
         
         //if everything went fine
         $response = $event->getResponse();

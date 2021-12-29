@@ -11,7 +11,6 @@
 namespace App\Controller\Admin;
 
 use App\Repository\ManiaplanetUserRepository;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -20,7 +19,6 @@ class UsersController extends AbstractController
 {
     private $userRepository;
     private $authChecker;
-    private $request;
     
     public function __construct(
             ManiaplanetUserRepository $userRepository,
@@ -28,7 +26,6 @@ class UsersController extends AbstractController
     ) {
         $this->userRepository = $userRepository;
         $this->authChecker = $authChecker;
-        $this->request = Request::createFromGlobals();
     }
     
     public function show()

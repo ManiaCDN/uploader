@@ -7,7 +7,7 @@
 
 namespace App\EventListener;
 
-use App\Service\Path;
+use App\Entity\Path;
 use Oneup\UploaderBundle\Event\ValidationEvent;
 use Oneup\UploaderBundle\Uploader\Exception\ValidationException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
@@ -18,20 +18,17 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 class UploadValidationListener
 {
     private $tokenStorage;
-    private $path;
     private $authChecker;
     
     public function __construct(
             UsageTrackingTokenStorage $tokenStorage,
-            Path $path,
             AuthorizationCheckerInterface $authChecker
     ) {
         $this->tokenStorage = $tokenStorage;
-        $this->path = $path;
         $this->authChecker = $authChecker;
     }
     
-    /*
+    /**
      * Checks if 
      * 1) User ist logged in
      * 2) Path doesn't escape the upload dir (checked automatically
@@ -48,9 +45,10 @@ class UploadValidationListener
         $request = $event->getRequest();
         $raw_path = $request->get('path');
         
-        $this->path->fromString($raw_path); // check 2) happens inside here
+        $path = new Path();
+        $path->fromString($raw_path); // check 2) happens inside here
         
-        if (!$this->path->isWritableBy($user)) {
+        if (!$path->isWritableBy($user)) {
             throw new ValidationException('Uploading outside user\'s directory is not allowed.');
         }
     }

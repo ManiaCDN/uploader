@@ -12,48 +12,32 @@
 
 namespace App\Controller;
 
+use App\Entity\Path;
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use App\Service\Mailer;
-use App\Service\Path;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Ckr\Util\ArrayMerger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Contracts\Service\ServiceSubscriberInterface;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Ckr\Util\ArrayMerger;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use ZipStream;
 use ZipStream\Option\Archive;
 
-class BrowseController extends AbstractController implements ServiceSubscriberInterface
+class BrowseController extends AbstractController
 {
     private $bfm;
     private $authChecker;
     private $fsm;
     private $request;
-    private $path;
     private $mailer;
     
     public function __construct()
     {
         $this->request = Request::createFromGlobals();
-    }
-    
-    /**
-     * Make the path service available through $this->get().
-     * See: https://symfony.com/doc/current/service_container/service_subscribers_locators.html#defining-a-service-subscriber
-     * It must inherit the services from the AbstractController.
-     * 
-     * @return array
-     */
-    public static function getSubscribedServices(): array
-    {
-        return array_merge(parent::getSubscribedServices(), [
-            'path' => Path::class,
-        ]);
     }
 
     public function show(BlockedFilesManager $bfm,
@@ -71,30 +55,30 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
         // parse the path into a Path object. Check for being in the base path included
         // trim / as they don't have any importance but would cause some special
         // handling if they were taken to the path
-        $this->path = $this->get('path');
-        $this->path->fromString($this->request->query->get('path', '.'));
+        $path = new Path();
+        $path->fromString($this->request->query->get('path', '.'));
         
         // (un-)blocks files, deletes files
         $this->blockDeleteAction();
 
         // create folder
-        $this->createFolderAction();
+        $this->createFolderAction($path);
 
         // create user folder in case it isn't created yet
         $this->fsm->createUserFolder();
         
         try {
-            $list = $this->makeList($this->path);
+            $list = $this->makeList($path);
         }
         catch (DirectoryNotFoundException $e) {
             // not found: show empty folder with an alert
-            $session->getFlashBag()->add('danger', 'The folder "'.$this->path->getString().'" does not exist. It was probably deleted. You are now seeing the overview.');
-            $this->path->fromString(''); // reset path to root folder
-            $list = $this->makeList($this->path);
+            $session->getFlashBag()->add('danger', 'The folder "'.$path->getString().'" does not exist. It was probably deleted. You are now seeing the overview.');
+            $path->fromString(''); // reset path to root folder
+            $list = $this->makeList($path);
         }
         
         return $this->render('browse/index.html.twig', [
-            'path'              => $this->path,
+            'path'              => $path,
             'list'              => $list,
             'blocklist'         => $this->bfm->read(false),
         ]);
@@ -108,16 +92,16 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
      * @return StreamedResponse
      */
     public function downloadLocsAction() {
-        $this->path = $this->get('path');
-        $this->path->fromString($this->request->query->get('path', '.'));
+        $path = new Path();
+        $path->fromString($this->request->query->get('path', '.'));
         
         // get a list of files we need to create .loc files for
         $finder = new Finder();
         $list = $finder
                 ->files() // look for files only, exclude directories
-                ->in($this->path->getAbsolutePath());
+                ->in($path->getAbsolutePath());
         
-        $response = new StreamedResponse(function() use ($list) {
+        $response = new StreamedResponse(function() use ($list, $path) {
             $options = new Archive();
             
             $options->setContentType('application/octet-stream');
@@ -131,7 +115,7 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
                 // to the path from the url (indicating the root of th archive)
                 // we add the relative paths from there to each file that's 
                 // going into the archive
-                $filepath = $this->path->append($file->getRelativePathname(), true);
+                $filepath = $path->append($file->getRelativePathname(), true);
                 
                 // for each file we find, we create a new .loc file with the same name.
                 // the content is the file's public URL
@@ -149,8 +133,8 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
      * @throws \Exception
      */
     private function blockDeleteAction() {
-        $blocks_raw = $this->request->request->get('block', array());
-        $delete_raw = $this->request->request->get('delete', array());
+        $blocks_raw = $this->request->request->all('block') ?? [];
+        $delete_raw = $this->request->request->all('delete') ?? [];
         $token  = $this->request->request->get('token');
         $submit = $this->request->request->get('submit_block-delete', false);
         
@@ -169,7 +153,7 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
             $blocks = [];
         
             foreach ($blocks_raw as $name => $status) {
-                $tmp = $this->get('path'); // retrieve new instance
+                $tmp = new Path();
                 $tmp->fromString($name);
                 $tmp->setBlocked(filter_var($status, FILTER_VALIDATE_BOOLEAN));
                 $blocks[] = $tmp;
@@ -182,7 +166,7 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
         // delete
         $delete = [];
         foreach ($delete_raw as $name => $status) {
-            $tmp = $this->get('path'); // retrieve new instance
+            $tmp = new Path();
             $tmp->fromString($name);
             $tmp->setDelete(filter_var($status, FILTER_VALIDATE_BOOLEAN));
             $delete[] = $tmp;
@@ -204,7 +188,7 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
      * 
      * @throws \Exception
      */
-    private function createFolderAction() {
+    private function createFolderAction($path) {
         $folder = $this->request->request->get('newdir', false);
         $token  = $this->request->request->get('token');
         
@@ -213,7 +197,7 @@ class BrowseController extends AbstractController implements ServiceSubscriberIn
                 throw new \Exception('CSRF token invalid!');
             }
             
-            $this->fsm->createFolder($this->path->append($folder));
+            $this->fsm->createFolder($path->append($folder));
         }
     }
     

@@ -11,15 +11,14 @@
 namespace App\Entity;
 
 use App\Security\OAuth2\ManiaplanetResourceOwner;
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\UniqueConstraint;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ManiaplanetUserRepository")
  * @ORM\Table(name="maniaplanet_user", 
  *    uniqueConstraints={
- *        @UniqueConstraint(name="login", 
+ *        @ORM\UniqueConstraint(name="login",
  *            columns={"login"})
  *    }
  * )
@@ -57,7 +56,14 @@ class ManiaplanetUser implements UserInterface, \Serializable
      * @ORM\Column(type="boolean")
      */
     private $email_send_approval_notification;
-    
+
+    public function getUserIdentifier() {
+        return $this->login;
+    }
+
+    /**
+     * @deprecated remove with Symfony 6, getUserIdentifier is the replacement
+     */
     public function getUsername()
     {
         return $this->login;

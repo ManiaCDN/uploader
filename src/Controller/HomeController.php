@@ -11,13 +11,20 @@
 namespace App\Controller;
 
 use App\Entity\Setting;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class HomeController extends AbstractController
 {
+    private $mangerRegistry;
+
+    public function __construct(ManagerRegistry $mangerRegistry) {
+        $this->mangerRegistry = $mangerRegistry;
+    }
+
     public function show()
     {
-        $welcome = $this->getDoctrine()
+        $welcome = $this->mangerRegistry
             ->getRepository(Setting::class)
             ->getWelcome();
         

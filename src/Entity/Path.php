@@ -7,7 +7,7 @@
  * base path UPLOAD_DIR (from env).
  */
 
-namespace App\Service;
+namespace App\Entity;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 use Webmozart\PathUtil\Path as PU;
