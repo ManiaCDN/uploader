@@ -26,15 +26,15 @@ And tell composer to get the libraries (*vendor* folder) for you
 
     $ composer install
 
-If the .env file does not exist yet, create a copy yourself from .env.dist and do the settings.
+Create a copy of .env and call it .env.local (or .env.prod for production). Adjust it to your needs.
 
 Finally run the database migrations to set it up / update it. The database should be empty.
 
     $ bin/console doctrine:migrations:migrate 
 
-That's it already. Now you're ready to start the development server of Symfony:
+To run a development server, you can install the [Symfony CLI](https://symfony.com/download). Then run
 
-    $ bin/console server:run
+    $ symfony server:start
 	
 Keep the terminal / commandline open. You'll find the sample on http://localhost:8000/
 
