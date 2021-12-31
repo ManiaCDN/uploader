@@ -124,6 +124,15 @@
     "laminas/laminas-code": {
         "version": "4.5.1"
     },
+    "league/flysystem": {
+        "version": "1.1.9"
+    },
+    "league/flysystem-sftp": {
+        "version": "1.0.22"
+    },
+    "league/mime-type-detection": {
+        "version": "1.9.0"
+    },
     "league/oauth2-client": {
         "version": "2.6.1"
     },
@@ -147,6 +156,18 @@
     },
     "ocramius/proxy-manager": {
         "version": "2.2.0"
+    },
+    "oneup/flysystem-bundle": {
+        "version": "3.7",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "3.0",
+            "ref": "e6c6440b279273a468e1f570b0fc1d4ff54ad69e"
+        },
+        "files": [
+            "config/packages/oneup_flysystem.yaml"
+        ]
     },
     "oneup/uploader-bundle": {
         "version": "2.0",
@@ -177,6 +198,9 @@
     },
     "phpdocumentor/type-resolver": {
         "version": "1.5.1"
+    },
+    "phpseclib/phpseclib": {
+        "version": "2.0.35"
     },
     "phpspec/prophecy": {
         "version": "1.11.1"
