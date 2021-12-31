@@ -52,7 +52,6 @@ connect_maniaplanet_finish:
     path: /connect/maniaplanet/finish
     controller: App\Controller\ManiaplanetController::finish
 
-# dynamic route for the uploader
-oneup_uploader:
-    resource: .
-    type: uploader
+process_upload:
+    path: /upload/process
+    controller: App\Controller\UploadController::upload

@@ -33,30 +33,6 @@ services:
     # Add service tag for Maniaplanet
     App\Security\OAuth2\ManiaplanetAuthenticator:
         tags: [controller.service_arguments]
-
-    # event to check if the file is allowed to be saved (security stuff)
-    # called before app.upload_listener
-    app.upload_validation_listener:
-        class: App\EventListener\UploadValidationListener
-        arguments: ["@security.token_storage"]
-        tags:
-            - { name: kernel.event_listener, event: oneup_uploader.validation, method: onValidate }
-    
-    # event to do external actions (like writing blocked_files)
-    # called after app.upload_validation_listener
-    app.upload_listener:
-        class: App\EventListener\UploadListener
-        # the '@' symbol is important: that's what tells the container
-        # you want to pass the *service* whose id is 'monolog.logger.request',
-        # and not just the *string* 'monolog.logger.request'
-        arguments: ['@App\Service\BlockedFilesManager']
-        tags:
-            - { name: kernel.event_listener, event: oneup_uploader.post_persist, method: onUpload }
-
-    # set the name and path of the uploaded file
-    app.upload_namer:
-        class: App\Uploader\UploadNamer
-        public: true
     
     Aptoma\Twig\Extension\MarkdownEngineInterface:
         class: Aptoma\Twig\Extension\MarkdownEngine\MichelfMarkdownEngine 
