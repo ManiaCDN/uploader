@@ -194,11 +194,7 @@ class Path {
      * @param UserInterface $user
      * @return boolean
      */
-    public function isWritableBy(?UserInterface $user): bool {
-        if (!$user) {
-            return false;
-        }
-
+    public function isWritableBy(UserInterface $user): bool {
         // banned users simply never write anywhere
         if (true === in_array('ROLE_BANNED', $user->getRoles())) {
             return false;
@@ -206,7 +202,7 @@ class Path {
         
         return (
             true === in_array('ROLE_ADMIN', $user->getRoles()) ||
-            $user->getUserIdentifier() == $this->getOwnerLogin()
+            $user->getUsername() == $this->getOwnerLogin()
         );
     }
     

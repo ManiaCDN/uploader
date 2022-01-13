@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block body %}
-    <form action="{{ path('process_upload') }}" class="dropzone" id="upload-browse"></form>
+    <form action="{{ oneup_uploader_endpoint('browse') }}" class="dropzone" id="upload-browse"></form>
 
     <!-- This message is shown when a file gets successfully uploaded. It's triggered by
     an event in dropzone.config.js. -->
