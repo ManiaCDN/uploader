@@ -18,4 +18,3 @@
 .phpunit
 .phpunit.result.cache
 ###< phpunit/phpunit ###
-/filesystem_master_private_key
