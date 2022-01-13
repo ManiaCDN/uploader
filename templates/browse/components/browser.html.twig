@@ -16,52 +16,51 @@
         </thead>
         <tbody>
             {% for item in list %}
-                {% set filepath = path.append(item.filename|trim('/')).getString %}
                 {% set block_disabled = not is_granted('ROLE_ADMIN') ? 'disabled' %}
                 <tr>
                     <!-- name -->
                     <td>
-                        {% if item.isDir %}
+                        {% if item.attributes.isDir %}
                             <a style="display:block; width:100%;" 
-                                href="{{ app.request.pathinfo ~ '?path=' ~ filepath }}">
-                                <span class="glyphicon glyphicon-folder-close"></span> {{ item.filename|e }}
+                                href="{{ app.request.pathinfo ~ '?path=' ~ item.path.getString }}">
+                                <span class="glyphicon glyphicon-folder-close"></span> {{ item.path.getBaseName|e }} {# todo #}
                             </a>
                         {% else %}
-                            <span class="glyphicon glyphicon-file"></span> {{ item.filename|e }}
+                            <span class="glyphicon glyphicon-file"></span> {{ item.path.getBaseName|e }} {# todo #}
                         {% endif %}
                     </td>
 
                     <!-- size -->
                     <td>
-                        {{ not item.isDir ? bytes.humanReadableBytes(item.getSize) }}
+                        {{ not item.attributes.isDir ? bytes.humanReadableBytes(item.attributes.fileSize) }}
                     </td>
 
                     <!-- block -->
                     <td>
-                        {% if item.isFile %}
-                            <input type="radio" {{ filepath in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="true">&nbsp;no
-                            <input type="radio" {{ filepath not in blocklist ? 'checked' }} {{ block_disabled }} name="block[{{ filepath }}]" value="false">&nbsp;yes
+                        {% if item.attributes.isFile %}
+                            <input type="radio" {{ item.is_blocked ? 'checked' }} {{ block_disabled }} name="block[{{ item.path.getString }}]" value="true">&nbsp;no
+                            <input type="radio" {{ item.is_blocked ? 'checked' }} {{ block_disabled }} name="block[{{ item.path.getString }}]" value="false">&nbsp;yes
                         {% endif %}
                     </td>
 
                     <!-- delete -->
                     <td>
-                        {% if path.isWritableBy(app.user) %}
-                            <input type="checkbox" name="delete[{{ filepath }}]" value="true">
+                        {% if item.path.isWritableBy(app.user) %}
+                            <input type="checkbox" name="delete[{{ item.path.getString }}]" value="true">
                         {% endif %}
                     </td>
 
                     <!-- download -->
                     <td>
-                        {% if item.isFile %}
-                            {% if filepath in blocklist %}
+                        {% if item.attributes.isFile %}
+                            {% if item.is_blocked %}
                                 <a class="btn btn-xs disabled" role="button" style="pointer-events: auto;"
                                     title="Usually takes <24h" data-toggle="tooltip" data-placement="auto left"
-                                    href="{{ path.append(item.filename).getPublicURL }}"
+                                    href="{{ item.path.getPublicUrl }}" {# todo fix href #}
                                 ><i class="glyphicon glyphicon-time"></i> Awaiting approval</a>
                             {% else %}
                                 <a class="btn btn-info btn-xs" role="button" style="width:100%;"
-                                    href="{{ path.append(item.filename).getPublicURL }}"
+                                    href="{{ item.path.getPublicUrl }}" {# todo fix href #}
                                 ><span class="glyphicon glyphicon-link"></span> Link</a>
                             {% endif %}
                         {% endif %}

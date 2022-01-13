@@ -12,6 +12,7 @@
 namespace App\Service;
 
 use App\Entity\Path;
+use League\Flysystem\FilesystemOperator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -22,22 +23,29 @@ class FilesystemManager
     private $user;
     private $requestStack;
     
-    private $filesystem;
-    
-    public function __construct(BlockedFilesManager $bfm,
-            TokenStorageInterface $tokenStorage,
-            RequestStack $requestStack
+    private $filesystem; // todo remove
+    private $storage;
+
+    /**
+     * @param FilesystemOperator $masterStorage named-auto-wiring to match 'master.storage' from flysystem.yaml
+     */
+    public function __construct(
+        BlockedFilesManager $bfm,
+        TokenStorageInterface $tokenStorage,
+        RequestStack $requestStack,
+        FilesystemOperator $masterStorage
     ) {
         $this->bfm = $bfm;
         $this->user = $tokenStorage->getToken()->getUser();
         $this->requestStack = $requestStack;
         
         $this->filesystem = new Filesystem();
+        $this->storage = $masterStorage;
     }
     
     /**
-     * Deletes a whole bunch of files and:
-     * - makes sure the logged in user has permission to do so.
+     * Deletes a bunch of files and:
+     * - makes sure the logged-in user has permission to do so.
      * - unblocks the file
      * 
      * $files is an array of Path objects.
@@ -51,7 +59,7 @@ class FilesystemManager
      *   "path/to/file" => *string of what happened to the file*
      * ]
      * 
-     * @param array $files
+     * @param Path[] $files
      * @return array
      */
     public function delete(array $files): array
@@ -60,29 +68,25 @@ class FilesystemManager
             return [];
         }
         
-        $unblocklist = array();
-        $changelog = array();
+        $unblocklist = [];
+        $changelog = [];
         
         foreach ($files as $path) {
-            $pathname = $path->getString();
+            $pathWithFilename = $path->getString();
             $owner = $path->getOwnerLogin();
-            $fullPath = $path->getAbsolutePath();
-            
-            // check if any of the pathnames aren't allowed to be written.
-            // only checks for user roles, not in the file system
+
             if (!$path->isWritableBy($this->user)) {
-                $this->requestStack->getSession()->getFlashBag()->add('danger', 'You\'re not allowed to delete this file: '.$pathname);
+                $this->requestStack->getSession()->getFlashBag()->add('danger', 'You\'re not allowed to delete this file: '.$pathWithFilename);
+                continue;
+            }
+
+            if (!$this->storage->fileExists($pathWithFilename)) {
+                $this->requestStack->getSession()->getFlashBag()->add('warning', '"'.$pathWithFilename.'" cannot be deleted because it either doesn\'t exist.');
                 continue;
             }
             
-            // check if file or directory exists and if it can be deleted
-            if (!is_writable($fullPath)) {
-                $this->requestStack->getSession()->getFlashBag()->add('warning', '"'.$pathname.'" cannot be deleted because it either doesn\'t exist or writing permissions are missing.');
-                continue;
-            }
-            
-            if (is_dir($fullPath) && !$this->isDirEmpty($fullPath)) {
-                $this->requestStack->getSession()->getFlashBag()->add('warning', 'Only empty folders can be deleted. Please delete all files inside "'.$pathname.'" first.');
+            if ($this->storage-> ($fullPath) && !$this->isDirEmpty($fullPath)) {
+                $this->requestStack->getSession()->getFlashBag()->add('warning', 'Only empty folders can be deleted. Please delete all files inside "'.$pathWithFilename.'" first.');
                 continue;
             }
             
@@ -93,7 +97,7 @@ class FilesystemManager
             // if it is deleted, it doesn't need to be blocked anymore
             $path->setBlocked(false); // whatever it was before, now it will be blocked
             $unblocklist[] = $path;
-            $changelog[$owner][$pathname] = 'deleted';
+            $changelog[$owner][$pathWithFilename] = 'deleted';
         }
         
         // unblock now
@@ -103,21 +107,14 @@ class FilesystemManager
         
         return $changelog;
     }
-    
-    /**
-     * Create a folder specified by $pathname
-     * $pathname must look like user/dir/to/create
-     * with the last element being the dir to be created 
-     * 
-     * @param Path $path
-     * @return bool
-     */
+
     public function createFolder(Path $path): bool {
-        $dirToCreate = $path->getAbsolutePath();
+        $dirToCreate = $path->getString();
         
-        if ($path->isWritableBy($this->user)
-            && !$this->filesystem->exists($dirToCreate)) {
-            $this->filesystem->mkdir($dirToCreate);
+        if ($path->isWritableBy($this->user) &&
+            !$this->storage->fileExists($dirToCreate)
+        ) {
+            $this->storage->createDirectory($dirToCreate);
             $this->requestStack->getSession()->getFlashBag()->add('success', 'Folder successfully created.');
             return true;
         } else {

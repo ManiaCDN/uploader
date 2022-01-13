@@ -17,46 +17,48 @@ use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use App\Service\Mailer;
 use Ckr\Util\ArrayMerger;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\FilesystemOperator;
+use League\Flysystem\StorageAttributes;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use ZipStream;
-use ZipStream\Option\Archive;
 
 class BrowseController extends AbstractController
 {
+    private $storage;
     private $bfm;
     private $authChecker;
     private $fsm;
-    private $request;
     private $mailer;
-    
-    public function __construct()
-    {
-        $this->request = Request::createFromGlobals();
-    }
+    private $request;
 
-    public function show(BlockedFilesManager $bfm,
-            AuthorizationCheckerInterface $authChecker,
-            FilesystemManager $fsm,
-            Mailer $mailer,
-            Session $session
+    /**
+     * @param FilesystemOperator $masterStorage named-auto-wiring to match 'master.storage' from flysystem.yaml
+     */
+    public function __construct(
+        FilesystemOperator $masterStorage,
+        BlockedFilesManager $bfm,
+        AuthorizationCheckerInterface $authChecker,
+        FilesystemManager $fsm,
+        Mailer $mailer
     ) {
+        $this->storage = $masterStorage;
         $this->bfm = $bfm;
         $this->authChecker = $authChecker;
         $this->fsm = $fsm;
         $this->mailer = $mailer;
-        $this->session = $session;
+    }
+
+    public function show(Request $request) {
+        $this->request = $request;
         
         // parse the path into a Path object. Check for being in the base path included
         // trim / as they don't have any importance but would cause some special
         // handling if they were taken to the path
         $path = new Path();
-        $path->fromString($this->request->query->get('path', '.'));
+        $path->fromString($request->query->get('path', '.'));
         
         // (un-)blocks files, deletes files
         $this->blockDeleteAction();
@@ -68,63 +70,19 @@ class BrowseController extends AbstractController
         $this->fsm->createUserFolder();
         
         try {
-            $list = $this->makeList($path);
+            $list = $this->makeDirectoryListing($path);
         }
-        catch (DirectoryNotFoundException $e) {
+        catch (DirectoryNotFoundException $e) { // todo use appropriate exception
             // not found: show empty folder with an alert
-            $session->getFlashBag()->add('danger', 'The folder "'.$path->getString().'" does not exist. It was probably deleted. You are now seeing the overview.');
+            $request->getSession()->getFlashBag()->add('danger', 'The folder "'.$path->getString().'" does not exist. It was probably deleted. You are now seeing the overview.');
             $path->fromString(''); // reset path to root folder
-            $list = $this->makeList($path);
+            $list = $this->makeDirectoryListing($path);
         }
         
         return $this->render('browse/index.html.twig', [
             'path'              => $path,
             'list'              => $list,
-            'blocklist'         => $this->bfm->read(false),
         ]);
-    }
-    
-    /**
-     * Create a zip archive of .loc files used by Maniaplanet and Trackmania.
-     * Requires GET parameter 'path' that gives the root of the zip that
-     * should be created, relative to UPLOAD_DIR.
-     * 
-     * @return StreamedResponse
-     */
-    public function downloadLocsAction() {
-        $path = new Path();
-        $path->fromString($this->request->query->get('path', '.'));
-        
-        // get a list of files we need to create .loc files for
-        $finder = new Finder();
-        $list = $finder
-                ->files() // look for files only, exclude directories
-                ->in($path->getAbsolutePath());
-        
-        $response = new StreamedResponse(function() use ($list, $path) {
-            $options = new Archive();
-            
-            $options->setContentType('application/octet-stream');
-            $options->setZeroHeader(true); // this is needed to prevent issues with truncated zip files
-            $options->setSendHttpHeaders(true); // let zipstream set the headers
-            $options->setEnableZip64(false); // according to zipstream readme, zip64 can cause issues on MacOS and we don't need it
-            
-            $zip = new ZipStream\ZipStream('locators.zip', $options);
-            
-            foreach ($list as $file) {
-                // to the path from the url (indicating the root of th archive)
-                // we add the relative paths from there to each file that's 
-                // going into the archive
-                $filepath = $path->append($file->getRelativePathname(), true);
-                
-                // for each file we find, we create a new .loc file with the same name.
-                // the content is the file's public URL
-                $zip->addFile($filepath->getString().'.loc', $filepath->getPublicURL());
-            }
-                
-            $zip->finish();
-        });
-        return $response;
     }
     
     /**
@@ -200,21 +158,21 @@ class BrowseController extends AbstractController
             $this->fsm->createFolder($path->append($folder));
         }
     }
-    
+
     /**
-     * Use Symfony's Finder component to get a directory listing
-     * 
      * @param Path $path
-     * @return Finder
+     * @return StorageAttributes[]
+     * @throws FilesystemException
      */
-    private function makeList(Path $path): Finder {
-        $finder = new Finder();
-        
-        $list = $finder
-                ->depth('== 0') // don't recurse deeper
-                ->sortByType() // show directories first, then files
-                ->in($path->getAbsolutePath()); // finally give the path and run
-        
-        return $list;
+    private function makeDirectoryListing(Path $path): array {
+        $blockedFiles = $this->bfm->read(true);
+        return $this->storage->listContents($path->getString())
+            ->sortByPath()
+            ->map(fn (StorageAttributes $attributes) => [
+                    'path'       => new Path($attributes->path()),
+                    'attributes' => $attributes,
+                    'is_blocked' => array_key_exists($attributes->path(), $blockedFiles)
+            ])
+            ->toArray();
     }
 }

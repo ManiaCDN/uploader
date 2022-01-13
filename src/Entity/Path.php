@@ -32,8 +32,10 @@ class Path {
      */
     private $delete;
     
-    public function __construct() {
-        
+    public function __construct($fromString = null) {
+        if (null !== $fromString) {
+            $this->fromString($fromString);
+        }
     }
     
     public function setBlocked(bool $var) {
@@ -102,6 +104,26 @@ class Path {
         else {
             return null;
         }
+    }
+
+    /**
+     * Gets the owner (login) this path (operates on the object only).
+     * This might give you a string that is not a valid login.
+     * Returns an empty string if it's the root folder
+     *
+     * @return string
+     */
+    public function getOwnerLogin(): string {
+        return $this->getAtom(0);
+    }
+
+    /**
+     * Gets the last atom of the path
+     *
+     * @return string
+     */
+    public function getBaseName(): string {
+        return $this->getAtom(-1);
     }
     
     public function getArray(): array {
@@ -189,7 +211,8 @@ class Path {
     }
     
     /**
-     * Check if the given user is allowed to write
+     * Check if the given user is allowed to write on a business-rule level.
+     * Does not check filesystem stuff.
      * 
      * @param UserInterface $user
      * @return boolean
@@ -208,17 +231,6 @@ class Path {
             true === in_array('ROLE_ADMIN', $user->getRoles()) ||
             $user->getUserIdentifier() == $this->getOwnerLogin()
         );
-    }
-    
-    /**
-     * Gets the owner (login) this path (operates on the object only).
-     * This might give you a string that is not a valid login.
-     * Returns an empty string if it's the root folder
-     * 
-     * @return string
-     */
-    public function getOwnerLogin(): string {
-        return $this->getAtom(0);
     }
     
     /**
