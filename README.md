@@ -26,7 +26,7 @@ And tell composer to get the libraries (*vendor* folder) for you
 
     $ composer install
 
-Create a copy of .env and call it .env.local (or .env.prod for production). Adjust it to your needs.
+Create a copy of .env and call it .env.local. Adjust it to your needs.
 
 Finally run the database migrations to set it up / update it. The database should be empty.
 
