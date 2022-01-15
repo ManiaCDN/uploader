@@ -11,6 +11,7 @@
 namespace App\Service;
 
 use App\Repository\ManiaplanetUserRepository;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class Mailer
@@ -23,13 +24,14 @@ class Mailer
     public function __construct(\Swift_Mailer $mailer,
             ManiaplanetUserRepository $userRepository,
             \Twig\Environment $twig,
-            RequestStack $requestStack
+            RequestStack $requestStack,
+            ContainerBagInterface $containerBag
     ) {
         $this->mailer = $mailer;
         $this->userRepository = $userRepository;
         $this->twig = $twig;
         $this->requestStack = $requestStack;
-        $this->from = 'maniacdn-approval@askuri.de';
+        $this->from = $containerBag->get('app.email_sender_address');
         $this->replyTo = 'info@maniacdn.net';
     }
     
