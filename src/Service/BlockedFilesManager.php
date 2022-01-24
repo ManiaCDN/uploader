@@ -14,8 +14,16 @@
 
 namespace App\Service;
 
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+
 class BlockedFilesManager
 {
+    private ContainerBagInterface $containerBag;
+
+    public function __construct(ContainerBagInterface $containerBag) {
+        $this->containerBag = $containerBag;
+    }
+
     /**
      * Takes an array of App\Service\Path's to be blocked or unblocked.
      * There are attributes of Path indicating whether
@@ -72,7 +80,7 @@ class BlockedFilesManager
      */
     public function read(bool $flip = true): array {
         // parse file into array similar to [n] => file.name
-        $file = file($_ENV['BLOCKED_FILES_LIST'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $file = file($this->getPathToBlockedFilesFile(), FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         
         if ($flip) {
             // invert keys and values to [file.name] => n
@@ -80,7 +88,7 @@ class BlockedFilesManager
         }
         return $file;
     }
-    
+
     /**
      * Counterpart to read()
      * Takes an array of the new list of blocked files
@@ -93,6 +101,10 @@ class BlockedFilesManager
         $filesBlockedString = implode("\n", array_flip($filesBlocked)); 
         
         // save
-        file_put_contents($_ENV['BLOCKED_FILES_LIST'], $filesBlockedString);
+        file_put_contents($this->getPathToBlockedFilesFile(), $filesBlockedString);
+    }
+
+    private function getPathToBlockedFilesFile(): string {
+        return $this->containerBag->get('kernel.project_dir') . '/' . ($_ENV['BLOCKED_FILES_LIST']);
     }
 }

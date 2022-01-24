@@ -20,7 +20,11 @@ class Mailer
     private $userRepository;
     private $twig;
     private $requestStack;
-    
+    private $containerBag;
+
+    private string $from;
+    private string $replyTo;
+
     public function __construct(\Swift_Mailer $mailer,
             ManiaplanetUserRepository $userRepository,
             \Twig\Environment $twig,
@@ -31,6 +35,7 @@ class Mailer
         $this->userRepository = $userRepository;
         $this->twig = $twig;
         $this->requestStack = $requestStack;
+        $this->containerBag = $containerBag;
         $this->from = $containerBag->get('app.email_sender_address');
         $this->replyTo = 'info@maniacdn.net';
     }
@@ -88,5 +93,19 @@ class Mailer
             
             $this->requestStack->getSession()->getFlashBag()->add('success', 'User notification was successfully sent to '.$owner.'.');
         }
+    }
+
+    /**
+     * Send a reminder email to ManiaCDN admins that files need to be reviewed
+     * @return void
+     */
+    public function sendBlockedFilesReminder() {
+        $message = (new \Swift_Message('ManiaCDN: files awaiting validation'))
+            ->setFrom($this->from)
+            ->setTo($this->containerBag->get('app.email_reviewer_address'))
+            ->setBody('Some files are waiting for validation', 'text/plain')
+        ;
+
+        $this->mailer->send($message);
     }
 }
