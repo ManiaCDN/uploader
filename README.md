@@ -11,7 +11,7 @@ This repository is part of the ManiaCDN project, a free CDN for and by the Mania
 	 - Oneup uploader bundle
 	 - Knpu OAuth2 client
 
-## Contributing/Installation
+## Installation
 You can open up an issue here on Github or send us an email to info [at] maniacdn [dot] net.
 If you would like to run the site yourselves, continue here:
 Clone the repo with git (or get the zip on the top-right)
@@ -32,6 +32,8 @@ Finally run the database migrations to set it up / update it. The database shoul
 
     $ bin/console doctrine:migrations:migrate 
 
+## Development
+
 To run a development server, you can install the [Symfony CLI](https://symfony.com/download). Then run
 
     $ symfony server:start
@@ -40,3 +42,14 @@ Keep the terminal / commandline open. You'll find the sample on http://localhost
 
 For people familiar with Symfony, things should go pretty straightforward. I have tried to comply with Symfony Best Practices as much as possible, so you should find all files where you'd expect them.
 You might also delete the pre-existing Migrations in src/Migrations, if doctrine throws strange errors while executing the migration.
+
+## Deployment to production
+
+- Set the docroot to the public folder in this project
+- You may need to configure mod_rewrite as it's always the case with symfony
+- Create a cronjob for the review reminders (checks if files need to be reviewed, job only needs to be scheduled with cron)
+```
+0 6,17 * * * /path/to/project/bin/console app:blocked-files-reminder
+```
+- double check .env.local again: make sure the mailer_url is set. If it's on default, you'll never find out mails actually
+  don't get sent.
