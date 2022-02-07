@@ -51,5 +51,10 @@ You might also delete the pre-existing Migrations in src/Migrations, if doctrine
 ```
 0 6,17 * * * /path/to/project/bin/console app:blocked-files-reminder
 ```
+- Create a cronjob for updating the timestamp file in the master
+```
+0,15,30,45 * * * * echo `date +\%s` > /path/to/master_folder/timestamp.txt
+```
 - double check .env.local again: make sure the mailer_url is set. If it's on default, you'll never find out mails actually
   don't get sent.
+- Enable HTTPS
