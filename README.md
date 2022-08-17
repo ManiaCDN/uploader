@@ -57,4 +57,4 @@ You might also delete the pre-existing Migrations in src/Migrations, if doctrine
 ```
 - double check .env.local again: make sure the mailer_url is set. If it's on default, you'll never find out mails actually
   don't get sent.
-- Enable HTTPS
+- Enable HTTPS (mandatory because permanent redirects to HTTPS were active in the past)
