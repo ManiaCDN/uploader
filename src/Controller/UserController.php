@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\ManiaplanetUser;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -36,7 +37,7 @@ class UserController extends AbstractController
         }
         
         // find user by email
-        $existingUser = $this->em->getRepository('App:ManiaplanetUser')
+        $existingUser = $this->em->getRepository(ManiaplanetUser::class)
             ->findOneBy(['email' => $email]);
         
         // annouce changes to doctrine
