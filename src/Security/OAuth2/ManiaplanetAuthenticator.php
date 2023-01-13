@@ -93,7 +93,7 @@ class ManiaplanetAuthenticator extends OAuth2Authenticator
                 $user->setNickname($maniaplanetResourceOwner->getNickname());
                 $user->setLogin($maniaplanetResourceOwner->getLogin());
                 $user->setRole('ROLE_USER');
-                $user->setEmailSendApprovalNotification(false);
+                $user->setEmailSendApprovalNotification(true);
 
                 $this->entityManager->persist($user); // tell doctrine about the change
                 $this->entityManager->flush(); // let doctrine execute it and run the query to the database
