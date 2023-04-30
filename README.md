@@ -43,6 +43,16 @@ Keep the terminal / commandline open. You'll find the sample on http://localhost
 For people familiar with Symfony, things should go pretty straightforward. I have tried to comply with Symfony Best Practices as much as possible, so you should find all files where you'd expect them.
 You might also delete the pre-existing Migrations in src/Migrations, if doctrine throws strange errors while executing the migration.
 
+## Running tests
+
+### Initial setup
+
+```shell
+php bin/console --env=test doctrine:database:create
+php bin/console --env=test doctrine:schema:create
+php bin/console --env=test doctrine:fixtures:load
+```
+
 ## Deployment to production
 
 - Set the docroot to the public folder in this project

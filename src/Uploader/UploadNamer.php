@@ -3,6 +3,7 @@
 namespace App\Uploader;
 
 use App\Entity\Path;
+use App\Service\PathFactory;
 use Oneup\UploaderBundle\Uploader\File\FileInterface;
 use Oneup\UploaderBundle\Uploader\Naming\NamerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -10,9 +11,14 @@ use Symfony\Component\HttpFoundation\RequestStack;
 class UploadNamer implements NamerInterface
 {
     private $requestStack;
-    
-    public function __construct(RequestStack $requestStack) {
+    private PathFactory $pathFactory;
+
+    public function __construct(
+        RequestStack $requestStack,
+        PathFactory $pathFactory,
+    ) {
         $this->requestStack = $requestStack;
+        $this->pathFactory = $pathFactory;
     }
     
     /**
@@ -28,7 +34,7 @@ class UploadNamer implements NamerInterface
         
         $filename = $file->getClientOriginalName();
 
-        $path = new Path();
+        $path = $this->pathFactory->newInstance();
         $path->fromString($raw_path);
         $fullpath = $path->append($filename);
         

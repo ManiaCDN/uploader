@@ -2,7 +2,7 @@
     "type": "project",
     "license": "proprietary",
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.1",
         "ext-iconv": "*",
         "ext-fileinfo": "*",
         "aptoma/twig-markdown": "^3.0",
@@ -41,6 +41,7 @@
     },
     "require-dev": {
         "dama/doctrine-test-bundle": "^7.2",
+        "doctrine/doctrine-fixtures-bundle": "^3.4",
         "phpstan/phpstan": "^1.2.0",
         "phpstan/phpstan-symfony": "^1.0.4",
         "phpunit/phpunit": "^9.4",

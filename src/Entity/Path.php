@@ -31,9 +31,11 @@ class Path {
      * @var bool true if the file is / should be deleted
      */
     private $delete;
-    
-    public function __construct() {
-        
+
+    private string $uploadDir;
+
+    public function __construct(string $uploadDir) {
+        $this->uploadDir = $uploadDir;
     }
     
     public function setBlocked(bool $var) {
@@ -147,7 +149,7 @@ class Path {
      * @return string
      */
     public function getAbsolutePath(): string {
-        return PU::join($_ENV['UPLOAD_DIR'], $this->getString());
+        return PU::join($this->uploadDir, $this->getString());
     }
     
     /**

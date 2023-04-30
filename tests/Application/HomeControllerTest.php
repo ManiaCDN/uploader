@@ -7,7 +7,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class HomeTest extends WebTestCase {
+class HomeControllerTest extends WebTestCase {
 
     private KernelBrowser $client;
     private EntityManagerInterface $entityManager;

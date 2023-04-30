@@ -16,6 +16,7 @@ use App\Entity\Path;
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use App\Service\Mailer;
+use App\Service\PathFactory;
 use Ckr\Util\ArrayMerger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\Exception\DirectoryNotFoundException;
@@ -34,30 +35,30 @@ class BrowseController extends AbstractController
     private $fsm;
     private $request;
     private $mailer;
-    
-    public function __construct()
-    {
-        $this->request = Request::createFromGlobals();
-    }
+    private PathFactory $pathFactory;
 
     public function show(BlockedFilesManager $bfm,
             AuthorizationCheckerInterface $authChecker,
             FilesystemManager $fsm,
             Mailer $mailer,
-            Session $session
+            Session $session,
+                         Request $request,
+            PathFactory $pathFactory,
     ) {
         $this->bfm = $bfm;
         $this->authChecker = $authChecker;
         $this->fsm = $fsm;
         $this->mailer = $mailer;
         $this->session = $session;
+        $this->request = $request;
+        $this->pathFactory = $pathFactory;
         
         // parse the path into a Path object. Check for being in the base path included
         // trim / as they don't have any importance but would cause some special
         // handling if they were taken to the path
-        $path = new Path();
+        $path = $pathFactory->newInstance();
         $path->fromString($this->request->query->get('path', '.'));
-        
+
         // (un-)blocks files, deletes files
         $this->blockDeleteAction();
 
@@ -92,7 +93,7 @@ class BrowseController extends AbstractController
      * @return StreamedResponse
      */
     public function downloadLocsAction() {
-        $path = new Path();
+        $path = $this->pathFactory->newInstance();
         $path->fromString($this->request->query->get('path', '.'));
         
         // get a list of files we need to create .loc files for
@@ -153,7 +154,7 @@ class BrowseController extends AbstractController
             $blocks = [];
         
             foreach ($blocks_raw as $name => $status) {
-                $tmp = new Path();
+                $tmp = $this->pathFactory->newInstance();
                 $tmp->fromString($name);
                 $tmp->setBlocked(filter_var($status, FILTER_VALIDATE_BOOLEAN));
                 $blocks[] = $tmp;
@@ -166,7 +167,7 @@ class BrowseController extends AbstractController
         // delete
         $delete = [];
         foreach ($delete_raw as $name => $status) {
-            $tmp = new Path();
+            $tmp = $this->pathFactory->newInstance();
             $tmp->fromString($name);
             $tmp->setDelete(filter_var($status, FILTER_VALIDATE_BOOLEAN));
             $delete[] = $tmp;

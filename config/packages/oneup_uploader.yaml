@@ -12,4 +12,4 @@ oneup_uploader:
             namer: app.upload_namer # which file name and folder structure to use
             disallowed_mimetypes: [php, php4, php5, php7, aspx, asp, pl, jsp, htaccess]
             storage:
-                directory: '%env(UPLOAD_DIR)%' # relative to kernel, namer works relative to this
+                directory: '%app.upload_dir%' # relative to kernel, namer works relative to this

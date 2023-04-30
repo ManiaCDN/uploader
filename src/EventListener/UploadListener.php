@@ -3,6 +3,7 @@ namespace App\EventListener;
 
 use App\Entity\Path;
 use App\Service\BlockedFilesManager;
+use App\Service\PathFactory;
 use Oneup\UploaderBundle\Event\PostPersistEvent;
 use Oneup\UploaderBundle\Uploader\Response\ResponseInterface;
 
@@ -10,9 +11,14 @@ class UploadListener
 {
     private $bfm;
 
-    public function __construct(BlockedFilesManager $bfm)
-    {
+    private PathFactory $pathFactory;
+
+    public function __construct(
+        BlockedFilesManager $bfm,
+        PathFactory $pathFactory
+    ) {
         $this->bfm = $bfm;
+        $this->pathFactory = $pathFactory;
     }
     
     /**
@@ -28,7 +34,7 @@ class UploadListener
         $request = $event->getRequest();
         $file    = $event->getFile();
 
-        $path = new Path();
+        $path = $this->pathFactory->newInstance();
         $path->fromString($request->get('path'));
         $path = $path->append($file->getBasename());
         $path->setBlocked(true);

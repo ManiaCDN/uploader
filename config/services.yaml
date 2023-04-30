@@ -6,6 +6,7 @@
 parameters:
     app.email_sender_address: '%env(EMAIL_SENDER_ADDRESS)%'
     app.email_reviewer_address: '%env(EMAIL_REVIEWER_ADDRESS)%'
+    app.upload_dir: '%kernel.project_dir%/%env(UPLOAD_DIR)%'
 
 services:
     # default configuration for services in *this* file
@@ -67,3 +68,10 @@ services:
         class: Aptoma\Twig\Extension\MarkdownExtension
         tags:
             - { name: twig.extension }
+
+    App\Service\PathFactory:
+        arguments:
+            $uploadDir: '%app.upload_dir%'
+    App\Service\FilesystemManager:
+        arguments:
+            $uploadDir: '%app.upload_dir%'

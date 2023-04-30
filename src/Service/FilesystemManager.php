@@ -21,16 +21,19 @@ class FilesystemManager
     private $bfm;
     private $user;
     private $requestStack;
+    private $uploadDir;
     
     private $filesystem;
     
     public function __construct(BlockedFilesManager $bfm,
             TokenStorageInterface $tokenStorage,
-            RequestStack $requestStack
+            RequestStack $requestStack,
+            string $uploadDir
     ) {
         $this->bfm = $bfm;
         $this->user = $tokenStorage->getToken()->getUser();
         $this->requestStack = $requestStack;
+        $this->uploadDir = $uploadDir;
         
         $this->filesystem = new Filesystem();
     }
@@ -130,7 +133,7 @@ class FilesystemManager
      * Creates the user's own folder named by his/her own login
      */
     public function createUserFolder() {
-        $this->filesystem->mkdir($_ENV['UPLOAD_DIR'].'/'.$this->user->getUsername());
+        $this->filesystem->mkdir($this->uploadDir.'/'.$this->user->getUsername());
     }
     
     /**

@@ -14,6 +14,7 @@ use App\Entity\Path;
 use App\Service\BlockedFilesManager;
 use App\Service\FilesystemManager;
 use App\Service\Mailer;
+use App\Service\PathFactory;
 use Ckr\Util\ArrayMerger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -29,18 +30,21 @@ class ReviewController extends AbstractController
     private $request;
     private $authChecker;
     private $mailer;
+    private $pathFactory;
     
     public function __construct(
             BlockedFilesManager $bfm,
             FilesystemManager $fsm,
             AuthorizationCheckerInterface $authChecker,
-            Mailer $mailer
+            Mailer $mailer,
+        PathFactory $pathFactory
     ) {
         $this->bfm = $bfm;
         $this->fsm = $fsm;
         $this->authChecker = $authChecker;
         $this->mailer = $mailer;
         $this->request = Request::createFromGlobals();
+        $this->pathFactory = $pathFactory;
     }
     
     public function show()
@@ -55,7 +59,7 @@ class ReviewController extends AbstractController
         $list_raw = $this->bfm->read(false);
         $list = [];
         foreach ($list_raw as $path_raw) {
-            $tmp = new Path();
+            $tmp = $this->pathFactory->newInstance();
             $tmp->fromString($path_raw);
             $list[] = $tmp;
         }
@@ -71,7 +75,7 @@ class ReviewController extends AbstractController
         }
         
         $file = $this->request->query->get('file');
-        $pathname = $_ENV['UPLOAD_DIR'].'/'.$file;
+        $pathname = $this->getParameter('app.upload_dir').'/'.$file;
         
         $spl = new \SplFileInfo($pathname); // why doesn't spl provide MIME types?
         $finfo = new \finfo(FILEINFO_MIME);
@@ -111,7 +115,7 @@ class ReviewController extends AbstractController
         // block:
         $blocks = [];
         foreach ($blocks_raw as $name => $status) {
-            $tmp = new Path();
+            $tmp = $this->pathFactory->newInstance();
             $tmp->fromString($name);
             $tmp->setBlocked(filter_var($status, FILTER_VALIDATE_BOOLEAN));
             $blocks[] = $tmp;
@@ -121,7 +125,7 @@ class ReviewController extends AbstractController
         // delete
         $delete = [];
         foreach ($delete_raw as $name => $status) {
-            $tmp = new Path();
+            $tmp = $this->pathFactory->newInstance();
             $tmp->fromString($name);
             $tmp->setDelete(filter_var($status, FILTER_VALIDATE_BOOLEAN));
             $delete[] = $tmp;

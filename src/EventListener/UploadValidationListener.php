@@ -8,6 +8,7 @@
 namespace App\EventListener;
 
 use App\Entity\Path;
+use App\Service\PathFactory;
 use Oneup\UploaderBundle\Event\ValidationEvent;
 use Oneup\UploaderBundle\Uploader\Exception\ValidationException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\UsageTrackingTokenStorage;
@@ -19,13 +20,16 @@ class UploadValidationListener
 {
     private $tokenStorage;
     private $authChecker;
+    private PathFactory $pathFactory;
     
     public function __construct(
             UsageTrackingTokenStorage $tokenStorage,
-            AuthorizationCheckerInterface $authChecker
+            AuthorizationCheckerInterface $authChecker,
+            PathFactory $pathFactory
     ) {
         $this->tokenStorage = $tokenStorage;
         $this->authChecker = $authChecker;
+        $this->pathFactory = $pathFactory;
     }
     
     /**
@@ -45,7 +49,7 @@ class UploadValidationListener
         $request = $event->getRequest();
         $raw_path = $request->get('path');
         
-        $path = new Path();
+        $path = $this->pathFactory->newInstance();
         $path->fromString($raw_path); // check 2) happens inside here
         
         if (!$path->isWritableBy($user)) {
