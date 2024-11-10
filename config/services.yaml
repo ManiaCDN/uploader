@@ -59,11 +59,3 @@ services:
     app.upload_namer:
         class: App\Uploader\UploadNamer
         public: true
-    
-    Aptoma\Twig\Extension\MarkdownEngineInterface:
-        class: Aptoma\Twig\Extension\MarkdownEngine\MichelfMarkdownEngine 
-
-    twig.extension.markdown:
-        class: Aptoma\Twig\Extension\MarkdownExtension
-        tags:
-            - { name: twig.extension }

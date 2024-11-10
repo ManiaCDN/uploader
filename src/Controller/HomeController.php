@@ -12,6 +12,7 @@ namespace App\Controller;
 
 use App\Entity\Setting;
 use Doctrine\Persistence\ManagerRegistry;
+use Michelf\Markdown;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class HomeController extends AbstractController
@@ -24,13 +25,13 @@ class HomeController extends AbstractController
 
     public function show()
     {
-        $welcome = $this->mangerRegistry
+        $welcomeMessageMarkdown = $this->mangerRegistry
             ->getRepository(Setting::class)
             ->getWelcome();
         
         return $this->render('home/index.html.twig', 
                 [
-                    "message" => $welcome
+                    "message" => Markdown::defaultTransform($welcomeMessageMarkdown)
                 ]);
     }
 }

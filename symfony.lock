@@ -1,7 +1,4 @@
 {
-    "aptoma/twig-markdown": {
-        "version": "3.4.1"
-    },
     "ckr/arraymerger": {
         "version": "dev-master"
     },
