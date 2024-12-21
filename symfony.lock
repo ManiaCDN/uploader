@@ -154,9 +154,6 @@
             "ref": "b19678d1535b9fe7cdf4647fd3483455e4fca458"
         }
     },
-    "paragonie/random_compat": {
-        "version": "v9.99.100"
-    },
     "phar-io/manifest": {
         "version": "2.0.3"
     },
