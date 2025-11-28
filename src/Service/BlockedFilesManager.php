@@ -105,7 +105,6 @@ class BlockedFilesManager
     }
 
     private function getPathToBlockedFilesFile(): string {
-        // todo: path working dir has changed, need to fix this in production probably
         return $_ENV['BLOCKED_FILES_LIST'];
     }
 }
