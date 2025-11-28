@@ -55,7 +55,8 @@ This is a community-powered CDN for Maniaplanet gaming platform. Users authentic
 - Internally uses `vfsStream` for file system isolation
 
 ### Database Testing
-- SQLite in-memory database via `.env.test`: `DATABASE_URL="sqlite:///:memory:"`
+- SQLite persisted database via `.env.test`
+- Schema applied through `IntegrationTestCase.initDatabase()`
 - Clean up entities between tests
 
 ### Authentication
