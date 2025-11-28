@@ -105,6 +105,6 @@ class BlockedFilesManager
     }
 
     private function getPathToBlockedFilesFile(): string {
-        return $this->containerBag->get('kernel.project_dir') . '/' . ($_ENV['BLOCKED_FILES_LIST']);
+        return $_ENV['BLOCKED_FILES_LIST'];
     }
 }
