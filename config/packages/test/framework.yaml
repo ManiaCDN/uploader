@@ -1,4 +1,6 @@
 framework:
     test: true
+    # don't display errors as HTML in test env
+    error_controller: null
     session:
-        storage_id: session.storage.mock_file
+        storage_factory_id: session.storage.factory.mock_file

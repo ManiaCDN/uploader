@@ -1,6 +1,5 @@
 {
     "type": "project",
-    "license": "proprietary",
     "require": {
         "php": "^7.4|^8.0",
         "ext-iconv": "*",
@@ -38,6 +37,7 @@
         "webmozart/path-util": "^2.3"
     },
     "require-dev": {
+        "mikey179/vfsstream": "^1.6",
         "phpstan/phpstan": "^1.2.0",
         "phpstan/phpstan-symfony": "^1.0.4",
         "phpunit/phpunit": "^9.4",
