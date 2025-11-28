@@ -105,6 +105,7 @@ class BlockedFilesManager
     }
 
     private function getPathToBlockedFilesFile(): string {
-        return $this->containerBag->get('kernel.project_dir') . '/' . ($_ENV['BLOCKED_FILES_LIST']);
+        // todo: path working dir has changed, need to fix this in production probably
+        return $_ENV['BLOCKED_FILES_LIST'];
     }
 }
