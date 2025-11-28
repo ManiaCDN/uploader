@@ -31,10 +31,6 @@ class FileUploadTest extends IntegrationTestCase
             true
         );
 
-        // prevent resetting of SQLite Database
-        // todo: consider switching to persisted database instead
-        $this->client->disableReboot();
-
         $this->client->request('POST', '/_uploader/browse/upload', ['path' => '/testuser'], ['file' => $uploadedFile]);
 
         // Check response

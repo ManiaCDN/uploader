@@ -37,6 +37,7 @@
         "webmozart/path-util": "^2.3"
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^8.2",
         "mikey179/vfsstream": "^1.6",
         "phpstan/phpstan": "^1.2.0",
         "phpstan/phpstan-symfony": "^1.0.4",
