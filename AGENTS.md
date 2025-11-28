@@ -42,3 +42,25 @@ This is a community-powered CDN for Maniaplanet gaming platform. Users authentic
 - Use exceptions for system errors
 - Flash messages for user-facing errors
 - Proper validation and security checks
+
+## Integration Test Architecture
+
+### Test Organization
+- Feature-based test organization in `tests/Integration/`
+- Base class: `IntegrationTestCase` for common setup
+- Test classes named by feature: `FileBrowsingTest`, `FileUploadTest`, etc.
+
+### Virtual Filesystem
+- To mock already uploaded files, use givenUploadedFiles()
+- Internally uses `vfsStream` for file system isolation
+
+### Database Testing
+- SQLite in-memory database via `.env.test`: `DATABASE_URL="sqlite:///:memory:"`
+- Clean up entities between tests
+
+### Authentication
+- Use Symfony's `loginUser()` to bypass OAuth2 in tests
+- Create test users directly in database
+
+### Common Test Patterns
+- Arrange, act, assert structure

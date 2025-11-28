@@ -12,7 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class IntegrationTestCase extends WebTestCase
 {
 
-    protected EntityManagerInterface $entityManager;
+    /** @var EntityManagerInterface $entityManager */
+    protected $entityManager;
     protected KernelBrowser $client;
 
     protected function setUp(): void
