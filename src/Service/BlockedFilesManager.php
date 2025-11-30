@@ -15,6 +15,7 @@
 namespace App\Service;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\Filesystem\Path;
 
 class BlockedFilesManager
 {
@@ -105,6 +106,26 @@ class BlockedFilesManager
     }
 
     private function getPathToBlockedFilesFile(): string {
-        return $_ENV['BLOCKED_FILES_LIST'];
+        $blockedFilesPath = $_ENV['BLOCKED_FILES_LIST'];
+        
+        if ($this->isAbsolutePath($blockedFilesPath)) {
+            return $blockedFilesPath;
+        }
+        
+        return Path::makeAbsolute(
+            $blockedFilesPath, 
+            $this->containerBag->get('kernel.project_dir') . '/public'
+        );
+    }
+    
+    private function isAbsolutePath(string $path): bool {
+        if (Path::isAbsolute($path)) {
+            return true;
+        }
+        
+        // Additional check for stream wrappers (vfs://, file://, etc.)
+        // because their path cannot simply be prefixed with an absolute path
+        // (mostly relevant for tests with vfs)
+        return str_contains($path, '://');
     }
 }
