@@ -9,7 +9,7 @@ class FileBrowsingTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $this->givenLoggedInTestuser();
+        $this->givenLoggedInUser();
         $this->givenUploadedFiles([
             'testuser' => [
                 'file1.txt' => 'Test file content',

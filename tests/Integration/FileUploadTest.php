@@ -11,7 +11,7 @@ class FileUploadTest extends IntegrationTestCase
     {
         parent::setUp();
 
-        $this->givenLoggedInTestuser();
+        $this->givenLoggedInUser();
     }
 
     public function testSuccessfulFileUpload()

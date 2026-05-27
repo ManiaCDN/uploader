@@ -41,18 +41,23 @@ class IntegrationTestCase extends WebTestCase
         vfsStream::create(['uploads' => $uploadedFiles], $this->vfsRoot);
     }
 
-    protected function givenLoggedInTestuser() {
-        $testUser = $this->createTestUser('testuser', 'test@example.com');
+    protected function givenLoggedInUser() {
+        $testUser = $this->createTestUser('testuser', 'test@example.com', 'ROLE_USER');
         $this->client->loginUser($testUser);
     }
 
-    private function createTestUser(string $login, string $email): ManiaplanetUser
+    protected function givenLoggedInAdminuser() {
+        $testUser = $this->createTestUser('testadmin', 'admin@example.com', 'ROLE_ADMIN');
+        $this->client->loginUser($testUser);
+    }
+
+    private function createTestUser(string $login, string $email, string $role): ManiaplanetUser
     {
         $user = new ManiaplanetUser();
         $user->setLogin($login);
         $user->setNickname($login);
         $user->setEmail($email);
-        $user->setRole('ROLE_USER');
+        $user->setRole($role);
         $user->setEmailSendApprovalNotification(true);
 
         $this->entityManager->persist($user);

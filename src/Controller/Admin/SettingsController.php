@@ -11,7 +11,6 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class SettingsController extends AbstractController
 {
-    private $request;
     private $managerRegistry;
     private $authChecker;
     
@@ -20,19 +19,16 @@ class SettingsController extends AbstractController
             ManagerRegistry $managerRegistry
     ) {
         $this->authChecker = $authChecker;
-        $this->request = Request::createFromGlobals();
         $this->managerRegistry = $managerRegistry;
     }
     
-    public function show()
+    public function show(Request $request)
     {
         if (false === $this->authChecker->isGranted('ROLE_ADMIN')) {
             throw new AccessDeniedException('Only Admins allowed here.');
         }
         
-        $this->request = Request::createFromGlobals();
-        
-        $this->setWelcome();
+        $this->setWelcome($request);
         
         $welcome_prev = $this->managerRegistry
             ->getRepository(Setting::class)
@@ -43,21 +39,21 @@ class SettingsController extends AbstractController
         ]);
     }
     
-    private function csrfCheck() {
-        $token = $this->request->request->get('token');
+    private function csrfCheck(Request $request) {
+        $token = $request->request->get('token');
         
         if (!$this->isCsrfTokenValid('admin_edit-home', $token)) {
             throw new \Exception('CSRF token invalid!');
         }
     }
      
-    private function setWelcome() {
-        $value = $this->request->request->get('welcome_message');
+    private function setWelcome(Request $request) {
+        $value = $request->request->get('welcome_message');
         if (null === $value) {
             return; // user most likely just came from clicking on the navigation entry
         }
         
-        $this->csrfCheck();
+        $this->csrfCheck($request);
         
         // get current setting so we know if it needs to be updated
         $db_setting = $this->managerRegistry
