@@ -1,7 +1,11 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+
 parameters:
+    level: 5
     paths:
         - src
-    autoload_directories:
-        - %rootDir%/../../../src/Migrations
+    scanDirectories:
+        - src/Migrations
     symfony:
-        container_xml_path: '%rootDir%/../../../var/cache/dev/srcApp_KernelDevDebugContainer.xml'
+        container_xml_path: var/cache/dev/App_KernelDevDebugContainer.xml
