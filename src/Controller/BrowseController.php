@@ -100,9 +100,7 @@ class BrowseController extends AbstractController
         $response = new StreamedResponse(function() use ($list, $path) {
             $options = new Archive();
 
-            $options->setContentType('application/octet-stream');
             $options->setZeroHeader(true); // this is needed to prevent issues with truncated zip files
-            $options->setSendHttpHeaders(true); // let zipstream set the headers
             $options->setEnableZip64(false); // according to zipstream readme, zip64 can cause issues on MacOS and we don't need it
 
             $zip = new ZipStream\ZipStream('locators.zip', $options);
@@ -120,6 +118,14 @@ class BrowseController extends AbstractController
 
             $zip->finish();
         });
+
+        // headers are set on the response instead of letting zipstream call
+        // header() directly, so Symfony stays the single authority for them
+        $response->headers->set('Content-Type', 'application/octet-stream');
+        $response->headers->set('Content-Disposition', 'attachment; filename="locators.zip"');
+        $response->headers->set('Cache-Control', 'private, no-store');
+        $response->headers->set('Content-Transfer-Encoding', 'binary');
+
         return $response;
     }
 
