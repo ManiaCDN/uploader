@@ -3,6 +3,7 @@
 namespace App\Tests\Integration;
 
 use App\Entity\ManiaplanetUser;
+use App\Tests\Support\TestUserFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use org\bovigo\vfs\vfsStream;
@@ -41,24 +42,35 @@ class IntegrationTestCase extends WebTestCase
         vfsStream::create(['uploads' => $uploadedFiles], $this->vfsRoot);
     }
 
-    protected function givenLoggedInUser() {
-        $testUser = $this->createTestUser('testuser', 'test@example.com', 'ROLE_USER');
-        $this->client->loginUser($testUser);
+    /**
+     * Logs in the given user or creates and logs in a default test user.
+     *
+     * @param ManiaplanetUser|null $user
+     * @return ManiaplanetUser The logged in user
+     */
+    protected function givenLoggedInUser(?ManiaplanetUser $user = null): ManiaplanetUser {
+        $user = $user ?? $this->createTestUser();
+        $this->client->loginUser($user);
+        return $user;
     }
 
-    protected function givenLoggedInAdminuser() {
-        $testUser = $this->createTestUser('testadmin', 'admin@example.com', 'ROLE_ADMIN');
-        $this->client->loginUser($testUser);
+    protected function givenLoggedInAdminuser(?ManiaplanetUser $user = null): ManiaplanetUser {
+        return $this->givenLoggedInUser(
+            $user ?? $this->createTestUser('testadmin', 'admin@example.com', 'ROLE_ADMIN')
+        );
     }
 
-    private function createTestUser(string $login, string $email, string $role): ManiaplanetUser
-    {
-        $user = new ManiaplanetUser();
-        $user->setLogin($login);
-        $user->setNickname($login);
-        $user->setEmail($email);
-        $user->setRole($role);
-        $user->setEmailSendApprovalNotification(true);
+    /**
+     * Creates a test user, persists it and returns it.
+     * See TestUserFactory::create() for the available parameters.
+     */
+    protected function createTestUser(
+        string $login = 'testuser',
+        string $email = 'test@example.com',
+        string $role = 'ROLE_USER',
+        bool $emailSendApprovalNotification = true
+    ): ManiaplanetUser {
+        $user = TestUserFactory::create($login, $email, $role, $emailSendApprovalNotification);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();

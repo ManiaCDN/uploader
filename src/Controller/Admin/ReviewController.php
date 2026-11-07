@@ -26,10 +26,9 @@ class ReviewController extends AbstractController
 {
     private $bfm;
     private $fsm;
-    private $request;
     private $authChecker;
     private $mailer;
-    
+
     public function __construct(
             BlockedFilesManager $bfm,
             FilesystemManager $fsm,
@@ -40,17 +39,16 @@ class ReviewController extends AbstractController
         $this->fsm = $fsm;
         $this->authChecker = $authChecker;
         $this->mailer = $mailer;
-        $this->request = Request::createFromGlobals();
     }
-    
-    public function show()
+
+    public function show(Request $request)
     {
         if (false === $this->authChecker->isGranted('ROLE_ADMIN')) {
             throw new AccessDeniedException('Only Admins allowed here.');
         }
-        
+
         // (un-)blocks files, deletes also
-        $this->blockDeleteAction();
+        $this->blockDeleteAction($request);
         
         $list_raw = $this->bfm->read(false);
         $list = [];
@@ -64,13 +62,13 @@ class ReviewController extends AbstractController
         ]);
     }
     
-    public function download()
+    public function download(Request $request)
     {
         if (false === $this->authChecker->isGranted('ROLE_ADMIN')) {
             throw new AccessDeniedException('Only Admins allowed here.');
         }
-        
-        $file = $this->request->query->get('file');
+
+        $file = $request->query->get('file');
         $pathname = $_ENV['UPLOAD_DIR'].'/'.$file;
         
         $spl = new \SplFileInfo($pathname); // why doesn't spl provide MIME types?
@@ -84,7 +82,7 @@ class ReviewController extends AbstractController
             basename($file)
         );
         
-        return $response->send();
+        return $response;
     }
     
     /**
@@ -92,11 +90,11 @@ class ReviewController extends AbstractController
      * 
      * @throws \Exception
      */
-    private function blockDeleteAction()
+    private function blockDeleteAction(Request $request)
     {
-        $blocks_raw = $this->request->request->all('block') ?? [];
-        $delete_raw = $this->request->request->all('delete') ?? [];
-        $token  = $this->request->request->get('token');
+        $blocks_raw = $request->request->all('block');
+        $delete_raw = $request->request->all('delete');
+        $token  = $request->request->get('token');
         
         if (empty($blocks_raw)) {
             // blocks will always list at least one file, if the folder wasn't empty
