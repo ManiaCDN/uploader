@@ -3,6 +3,7 @@
 namespace App\Tests\Integration;
 
 use App\Entity\ManiaplanetUser;
+use App\Tests\Support\TestUserFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use org\bovigo\vfs\vfsStream;
@@ -59,18 +60,17 @@ class IntegrationTestCase extends WebTestCase
         );
     }
 
+    /**
+     * Creates a test user, persists it and returns it.
+     * See TestUserFactory::create() for the available parameters.
+     */
     protected function createTestUser(
         string $login = 'testuser',
         string $email = 'test@example.com',
         string $role = 'ROLE_USER',
         bool $emailSendApprovalNotification = true
     ): ManiaplanetUser {
-        $user = new ManiaplanetUser();
-        $user->setLogin($login);
-        $user->setNickname($login);
-        $user->setEmail($email);
-        $user->setRole($role);
-        $user->setEmailSendApprovalNotification($emailSendApprovalNotification);
+        $user = TestUserFactory::create($login, $email, $role, $emailSendApprovalNotification);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();

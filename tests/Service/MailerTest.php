@@ -4,6 +4,7 @@ namespace App\Tests\Service;
 
 use App\Entity\ManiaplanetUser;
 use App\Repository\ManiaplanetUserRepository;
+use App\Tests\Support\TestUserFactory;
 use App\Service\Mailer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -134,13 +135,6 @@ class MailerTest extends TestCase
 
     private function createUser(string $login, string $email, bool $notificationsEnabled): ManiaplanetUser
     {
-        $user = new ManiaplanetUser();
-        $user->setLogin($login);
-        $user->setNickname($login);
-        $user->setEmail($email);
-        $user->setRole('ROLE_USER');
-        $user->setEmailSendApprovalNotification($notificationsEnabled);
-
-        return $user;
+        return TestUserFactory::create($login, $email, 'ROLE_USER', $notificationsEnabled);
     }
 }
