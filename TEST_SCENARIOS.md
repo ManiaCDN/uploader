@@ -24,13 +24,13 @@
 - CSRF protection on review form
 - Access restriction for non-admin users
 
-## ⏳ PENDING (Next Steps)
+### 4. LOC File Download Tests (`LocDownloadTest.php`)
+- ZIP file creation for .loc files (`maennchen/zipstream-php` via `BrowseController::downloadLocsAction`)
+- .loc entry names and contents (public URLs) for root and subdirectories
+- Authentication required (`/browse` access control)
+- `tests/Support/ZipReader.php`: minimal zip parser (no ext-zip dependency, uses `gzinflate`)
 
-### 4. LOC File Download Tests - `maennchen/zipstream-php`
-- ZIP file creation for .loc files
-- Download functionality  
-- File streaming
-- HTTP response headers
+## ⏳ PENDING (Next Steps)
 
 ### 5. Homepage Markdown Content Tests - `michelf/php-markdown` + database
 - Markdown rendering on homepage
@@ -49,8 +49,8 @@
 
 ## Current Status Summary
 
-**Progress**: 3/6 scenarios completed ✅
-**Next Action**: Start LOC File Download Tests (`maennchen/zipstream-php`)
+**Progress**: 4/7 scenarios completed ✅
+**Next Action**: Start Homepage Markdown Content Tests (`michelf/php-markdown` + `Setting` entity)
 **Foundation**: Solid testing infrastructure established with vfsStream, database patterns, and file upload validation
 
 ## Dependencies Covered
